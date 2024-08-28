@@ -1,0 +1,34 @@
+
+
+.navbar {
+    background-color: #3b82f6;
+    padding: 16px; 
+    display: flex;
+    position: fixed; 
+    top: 0;
+    width: 100%;
+  }
+  
+  
+  .navcontainer {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  
+  .navbar-brand {
+    font-size: 2rem; 
+    font-weight: bold;
+    font: Helvetica;
+    text-decoration: none;
+    color: white; 
+    display: flex;
+    padding-left: 5px;
+  }
+  
+  .navlogo {
+    height: 3rem;
+    width: auto;
+    align-items: left; 
+  }
+  
