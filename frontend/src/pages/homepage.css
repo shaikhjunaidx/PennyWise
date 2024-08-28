@@ -2,37 +2,182 @@
 
 .logincontainer {
     display: grid;
-    grid-template-areas: 
-        "motto       motto        homeart homeart"
-        "loginButton signUpButton homeart homeart"; 
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-     height: 100vh;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    height: 100vh;
+    gap: 5px;
 }
 
 .motto {
-    font-size: 1rem; 
+    font-size: 3rem; 
     font-weight: bold;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin-bottom: 20px;
-    align-content: center;
+    align-self: center;
+    grid-column: 2 / 4;
+    grid-row: 3/4;
+    align-self: center; 
+    justify-self: center;
+    text-align: center;
 }
+
+
 
 .loginButton{
-    background-color: #3b82f6; 
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 2rem;
-    color: white;
-    align-self: center;
-}
+    background-color: #40acc7;
+    border-radius: 8px;
+    border-style: none;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+    height: 40px;
+    line-height: 20px;
+    list-style: none;
+    margin: 0;
+    outline: none;
+    padding: 10px 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    transition: color 100ms;
+    vertical-align: baseline;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    grid-column: 2 / 3;
+    grid-row: 4/5;
+    align-self: center; 
+  }
+  
+  .button-1:hover,
+  .button-1:focus {
+    background-color: #13040a;
+  }
 
-.signUpButton {
-    background-color: #3b82f6; 
-    font-family: Arial, Helvetica, sans-serif;
-    font-size: 2rem;
-    color: white;
-    align-self: center;
-}
+.signUpButton{
+    background-color: #40acc7;
+    border-radius: 8px;
+    border-style: none;
+    box-sizing: border-box;
+    color: #FFFFFF;
+    cursor: pointer;
+    display: inline-block;
+    font-family: "Haas Grot Text R Web", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 25px;
+    font-weight: 500;
+    height: 40px;
+    line-height: 20px;
+    list-style: none;
+    margin: 0;
+    outline: none;
+    padding: 10px 16px;
+    position: relative;
+    text-align: center;
+    text-decoration: none;
+    transition: color 100ms;
+    vertical-align: baseline;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+    grid-column: 3 / 4;
+    grid-row: 4/5;
+    align-self: center; 
+  }
+  
+  .button-1:hover,
+  .button-1:focus {
+    background-color: #13040a;
+  }
 
 .homeart {
-    width: 100%;
-    height: 50%;
+    width: 80%;
+    grid-column: 5/ 8;
+    grid-row: 3/5;
+    align-self:center;
+    justify-self: center;
+
 }
+.footer{
+    grid-column: 1/ 9;
+    grid-row: 8/9;
+}
+
+.footer {
+    position: relative;
+    width: 100%;
+    background: #3586ff;
+    min-height: 5px;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+  
+
+  .footer p {
+    color: #fff;
+    margin: 15px 0 10px 0;
+    font-size: 1rem;
+    font-weight: 300;
+  }
+  
+  .wave {
+    position: absolute;
+    top: -50px;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background: url("https://i.ibb.co/wQZVxxk/wave.png");
+    background-size: 1000px 50px;
+  }
+  
+  .wave#wave1 {
+    z-index: 1000;
+    opacity: 1;
+    bottom: 0;
+    animation: animateWaves 4s linear infinite;
+  }
+  
+  .wave#wave2 {
+    z-index: 999;
+    opacity: 0.5;
+    bottom: 10px;
+    animation: animate 4s linear infinite !important;
+  }
+  
+  .wave#wave3 {
+    z-index: 1000;
+    opacity: 0.2;
+    bottom: 15px;
+    animation: animateWaves 3s linear infinite;
+  }
+  
+  .wave#wave4 {
+    z-index: 999;
+    opacity: 0.7;
+    bottom: 20px;
+    animation: animate 3s linear infinite;
+  }
+  
+  @keyframes animateWaves {
+    0% {
+      background-position-x: 1000px;
+    }
+    100% {
+      background-positon-x: 0px;
+    }
+  }
+  
+  @keyframes animate {
+    0% {
+      background-position-x: -1000px;
+    }
+    100% {
+      background-positon-x: 0px;
+    }
+  }
+  
