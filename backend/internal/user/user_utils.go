@@ -4,8 +4,11 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"log"
+	"os"
 	"time"
 
+	"github.com/golang-jwt/jwt/v4"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -14,6 +17,34 @@ type PasswordResetToken struct {
 	Token     string
 	UserEmail string
 	ExpiresAt time.Time
+}
+
+func GenerateJWTToken(username string) (string, error) {
+	expirationTIme := time.Now().Add(24 * time.Hour).Unix()
+
+	// Create the JWT claims, which includes the username and expiry time
+	claims := &jwt.StandardClaims{
+		Subject:   username,
+		ExpiresAt: expirationTIme,
+	}
+
+	// Create the token using the HS256 signing method and the claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	jwtSecretKey := os.Getenv("JWT_SECRET")
+
+	if jwtSecretKey == "" {
+		log.Println("JWT_SECRET environment variable is not set")
+		return "", errors.New("JWT_SECRET is not set")
+	}
+
+	tokenString, err := token.SignedString([]byte(jwtSecretKey))
+
+	if err != nil {
+		return "", err
+	}
+
+	return tokenString, nil
 }
 
 // HashPassword hashes the given password using bcrypt

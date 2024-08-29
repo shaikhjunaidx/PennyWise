@@ -34,17 +34,21 @@ func (s *UserService) SignUp(username, email, password string) (*models.User, er
 }
 
 // Login authenticates a user based on username and password
-func (s *UserService) Login(username, password string) (*models.User, error) {
+func (s *UserService) Login(username, password string) (string, error) {
 	user, err := s.Repo.FindByUsername(username)
 	if err != nil {
-		return nil, errors.New("user not found")
+		return "", errors.New("user not found")
 	}
 
 	if err := ComparePasswords(user.PasswordHash, password); err != nil {
-		return nil, errors.New("incorrect password")
+		return "", errors.New("incorrect password")
 	}
 
-	return user, nil
+	token, err := GenerateJWTToken(username)
+	if err != nil {
+        return "", err
+    }
+	return token, nil
 }
 
 // RequestPasswordReset generates a password reset token for the user
