@@ -42,10 +42,10 @@ func getEnvironment() string {
 }
 
 func getEnvFilePath(env string) string {
-	if env == "dev" {
-		return fmt.Sprintf(".env.%s", env)
+	if env == "test" {
+		return fmt.Sprintf("../.env.%s", env)
 	}
-	return fmt.Sprintf("../.env.%s", env)
+	return fmt.Sprintf(".env.%s", env)
 }
 
 func loadEnvFile(envFile string) {

@@ -1,6 +1,6 @@
 module github.com/shaikhjunaidx/pennywise-backend
 
-go 1.22.4
+go 1.22
 
 require (
 	github.com/golang-jwt/jwt/v4 v4.5.0
