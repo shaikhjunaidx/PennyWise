@@ -5,6 +5,7 @@
     grid-template-columns: 2fr 2fr 2fr 0.5fr 1fr 2fr 2fr 2fr;
     height: 100vh;
     gap: 5px;
+    position: relative;
 }
 
 .motto {
@@ -180,4 +181,3 @@
       background-positon-x: 0px;
     }
   }
-  

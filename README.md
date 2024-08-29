@@ -87,6 +87,11 @@ To run the PennyWise backend locally, you need to set up environment variables t
    go test ./...
    ```
 
+To run the PennyWise frontend locally, you need to :
+
+1. **Go to the project root and run `npm install` to install dependencies**
+2. **Then do `npm run dev` to start the server**
+
 ## **Future Work**
 
 - Implement JWT-based authentication and route protection.
