@@ -2,7 +2,7 @@ import React from "react";
 
 
 const Dashboard=()=>{
-    return (<div></div>);
+    return (<div>You are fucked</div>);
 }
 
 export default Dashboard;
