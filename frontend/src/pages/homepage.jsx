@@ -42,7 +42,7 @@ const homepage=()=>{
         <div className="logincontainer">
             <h1 className="motto">Spend Your Pennies Wisely </h1>
             <button className="loginButton" onClick={openLoginForm}>
-                login
+                Login
             </button>
             <button className="signUpButton" onClick={openSignupForm}>
                 Sign-up

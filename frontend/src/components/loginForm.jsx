@@ -21,8 +21,8 @@ const LoginForm = ({ closeForm }) => {
             if (response.ok) {
                 const data = await response.json();
                 console.log("Login successful:", data);
-                // Optionally, store the token or user data if returned by the API
-                // localStorage.setItem("token", data.token);
+                localStorage.setItem("token", data.token);
+
                 closeForm();
                 navigate("/dashboard");
             } else {
@@ -39,7 +39,7 @@ const LoginForm = ({ closeForm }) => {
     return (
         <div className="loginFormBackground" onClick={closeForm}>
             <div className="loginFormContainer" onClick={(e) => e.stopPropagation()}>
-                <h2>Login</h2>
+                <h2 className="formTitle">Login</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="inputGroup">
                         <label htmlFor="username">Username:</label>
