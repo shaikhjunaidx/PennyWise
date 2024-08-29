@@ -3,10 +3,13 @@ import React, { useState } from "react";
 import Navbar from "../components/Navbar";
 import art from "../assets/financeBackground.jpg";
 import "./homepage.css"
+import "./loginForm.css"
 import LoginForm from "../components/LoginForm";
+import SignUpForm from "../components/signUpForm";
 
 const homepage=()=>{
     const [isLoginForm,setIsLoginForm]=useState(false);
+    const [isSignupForm,setIsSignupForm]=useState(false);
 
     const openLoginForm=()=>
         { 
@@ -19,18 +22,29 @@ const homepage=()=>{
             console.log("CloseForm Clicked")
             setIsLoginForm(false);
         };
-
+    
+    const openSignupForm=()=>
+            { 
+                setIsSignupForm(true);
+            };
+        
+    const closeSignupForm=()=>
+            {   
+                setIsSignupForm(false);
+            };
+        
 
     return(
         <>
         <Navbar/>
         {isLoginForm && <LoginForm closeForm={closeLoginForm} />}
+        {isSignupForm && <SignUpForm closeForm={closeSignupForm} />}
         <div className="logincontainer">
             <h1 className="motto">Spend Your Pennies Wisely </h1>
             <button className="loginButton" onClick={openLoginForm}>
                 login
             </button>
-            <button className="signUpButton">
+            <button className="signUpButton" onClick={openSignupForm}>
                 Sign-up
             </button>
             <img src={art} className="homeart"/>
