@@ -1,17 +1,40 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = ({ closeForm }) => {
-
-
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
+    const navigate=useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log("Username:", username);
-        console.log("Password:", password);
-        closeForm();
+
+        try {
+            const response = await fetch("http://localhost:8080/api/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("Login successful:", data);
+                // Optionally, store the token or user data if returned by the API
+                // localStorage.setItem("token", data.token);
+                closeForm();
+                navigate("/dashboard");
+            } else {
+                console.log("Login failed");
+                alert("Invalid username or password");
+            }
+        } catch (error) {
+            console.error("Error during login:", error);
+            alert("An error occurred during login. Please try again.");
+        }
     };
+    
     console.log("Here")
     return (
         <div className="loginFormBackground" onClick={closeForm}>
