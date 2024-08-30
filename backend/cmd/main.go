@@ -19,16 +19,12 @@ func main() {
 
 	router := mux.NewRouter()
 
-	// Set up routes for the application
 	routes.SetupUserRoutes(router, database)
 
-	// Serve the Swagger UI at /swagger/
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 
-	// Serve the Swagger JSON documentation file
 	router.Handle("/swagger/doc.json", http.FileServer(http.Dir("./docs")))
 
-	// Set up CORS middleware
 	corsMiddleware := handlers.CORS(
 		handlers.AllowedOrigins([]string{"http://localhost:5173"}),
 		handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE", "OPTIONS"}),

@@ -74,7 +74,7 @@ func connectToDatabase(cfg *config.Config) *gorm.DB {
 }
 
 func applyMigrations(db *gorm.DB) {
-	if err := db.AutoMigrate(&models.User{}); err != nil {
+	if err := db.AutoMigrate(&models.User{}, &models.Category{}, &models.Transaction{}); err != nil {
 		log.Fatalf("Could not migrate database schema: %v", err)
 	}
 }
