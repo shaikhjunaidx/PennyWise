@@ -16,7 +16,7 @@ const SignUpForm = ({ closeForm }) => {
     return (
         <div className="loginFormBackground" onClick={closeForm}>
             <div className="loginFormContainer" onClick={(e) => e.stopPropagation()}>
-                <h2>Sign Up</h2>
+                <h2 className="formTitle">Sign Up</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="inputGroup">
                         <label htmlFor="username">Username:</label>
