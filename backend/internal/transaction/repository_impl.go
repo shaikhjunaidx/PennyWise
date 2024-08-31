@@ -57,10 +57,11 @@ func (r *TransactionRepositoryImpl) FindByID(id uint) (*models.Transaction, erro
 func (r *TransactionRepositoryImpl) FindAllByUsername(username string) ([]*models.Transaction, error) {
 	var transactions []*models.Transaction
 
-	if err := r.DB.Joins("JOIN users ON users.id = transactions.user_id").
+	err := r.DB.Joins("JOIN users ON users.id = transactions.user_id").
 		Where("users.username = ?", username).
-		Preload("User").Preload("Category").
-		Find(&transactions).Error; err != nil {
+		Preload("Category").Find(&transactions).Error
+
+	if err != nil {
 		return nil, err
 	}
 

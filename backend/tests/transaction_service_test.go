@@ -10,27 +10,45 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setUpTransactionService() (*transaction.TransactionService, *mocks.MockTransactionRepository) {
+func setUpTransactionService() (*transaction.TransactionService, *mocks.MockTransactionRepository, *mocks.MockUserRepository) {
 	mockRepo := new(mocks.MockTransactionRepository)
-	service := transaction.NewTransactionService(mockRepo)
-	return service, mockRepo
+	mockUserRepo := &mocks.MockUserRepository{
+		Users: make(map[string]*models.User),
+	}
+	service := transaction.NewTransactionService(mockRepo, mockUserRepo)
+	return service, mockRepo, mockUserRepo
+}
+
+func createTestUser(mockUserRepo *mocks.MockUserRepository, username string, id uint) *models.User {
+	user := &models.User{
+		ID:       id,
+		Username: username,
+		Email:    username + "@example.com",
+	}
+	mockUserRepo.Users[username] = user
+	return user
+}
+
+func createTestTransaction(userID, categoryID uint, amount float64, description string) *models.Transaction {
+	return &models.Transaction{
+		UserID:          userID,
+		CategoryID:      categoryID,
+		Amount:          amount,
+		Description:     description,
+		TransactionDate: time.Now(),
+	}
 }
 
 func TestTransactionService_AddTransaction(t *testing.T) {
-	service, mockRepo := setUpTransactionService()
+	service, mockRepo, mockUserRepo := setUpTransactionService()
 
-	transaction := &models.Transaction{
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
-		TransactionDate: time.Now(),
-	}
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
+	transaction := createTestTransaction(user.ID, 1, 100.0, "Groceries")
 
 	mockRepo.On("Create", transaction).Return(nil)
 
-	result, err := service.AddTransaction(transaction.UserID, transaction.CategoryID,
-		transaction.Amount, transaction.Description, transaction.TransactionDate)
+	result, err := service.AddTransaction(username, transaction.CategoryID, transaction.Amount, transaction.Description, transaction.TransactionDate)
 
 	assert.NoError(t, err)
 	assert.Equal(t, transaction, result)
@@ -39,16 +57,10 @@ func TestTransactionService_AddTransaction(t *testing.T) {
 }
 
 func TestTransactionService_UpdateTransaction(t *testing.T) {
-	service, mockRepo := setUpTransactionService()
+	service, mockRepo, _ := setUpTransactionService()
 
-	transaction := &models.Transaction{
-		ID:              1,
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
-		TransactionDate: time.Now(),
-	}
+	transaction := createTestTransaction(1, 1, 100.0, "Groceries")
+	transaction.ID = 1
 
 	updatedAmount := 200.0
 	updatedCategoryID := 2
@@ -68,7 +80,7 @@ func TestTransactionService_UpdateTransaction(t *testing.T) {
 }
 
 func TestTransactionService_DeleteTransaction(t *testing.T) {
-	service, mockRepo := setUpTransactionService()
+	service, mockRepo, _ := setUpTransactionService()
 
 	transactionID := uint(1)
 
@@ -81,24 +93,14 @@ func TestTransactionService_DeleteTransaction(t *testing.T) {
 }
 
 func TestTransactionService_GetTransactionsForUser(t *testing.T) {
-	service, mockRepo := setUpTransactionService()
+	service, mockRepo, mockUserRepo := setUpTransactionService()
 
 	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
+
 	transactions := []*models.Transaction{
-		{
-			UserID:          1,
-			CategoryID:      1,
-			Amount:          50.0,
-			Description:     "Dinner",
-			TransactionDate: time.Now(),
-		},
-		{
-			UserID:          1,
-			CategoryID:      2,
-			Amount:          150.0,
-			Description:     "Utilities",
-			TransactionDate: time.Now(),
-		},
+		createTestTransaction(user.ID, 1, 50.0, "Dinner"),
+		createTestTransaction(user.ID, 2, 150.0, "Utilities"),
 	}
 
 	mockRepo.On("FindAllByUsername", username).Return(transactions, nil)
@@ -112,17 +114,11 @@ func TestTransactionService_GetTransactionsForUser(t *testing.T) {
 }
 
 func TestTransactionService_GetTransactionByID_Success(t *testing.T) {
-	service, mockRepo := setUpTransactionService()
+	service, mockRepo, _ := setUpTransactionService()
 
 	transactionID := uint(1)
-	expectedTransaction := &models.Transaction{
-		ID:              transactionID,
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
-		TransactionDate: time.Now(),
-	}
+	expectedTransaction := createTestTransaction(1, 1, 100.0, "Groceries")
+	expectedTransaction.ID = transactionID
 
 	mockRepo.On("FindByID", transactionID).Return(expectedTransaction, nil)
 
@@ -135,7 +131,7 @@ func TestTransactionService_GetTransactionByID_Success(t *testing.T) {
 }
 
 func TestTransactionService_GetTransactionByID_NotFound(t *testing.T) {
-	service, mockRepo := setUpTransactionService()
+	service, mockRepo, _ := setUpTransactionService()
 
 	transactionID := uint(1)
 

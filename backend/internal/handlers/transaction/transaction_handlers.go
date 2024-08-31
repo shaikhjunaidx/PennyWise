@@ -11,30 +11,27 @@ import (
 	"github.com/shaikhjunaidx/pennywise-backend/internal/transaction"
 )
 
+type TransactionRequest struct {
+	CategoryID      uint    `json:"category_id"`
+	Amount          float64 `json:"amount"`
+	Description     string  `json:"description"`
+	TransactionDate string  `json:"transaction_date"`
+}
+
 // CreateTransactionHandler handles the creation of a new transaction.
 // @Summary Create Transaction
 // @Description Creates a new transaction for the authenticated user, linking it to a specific category.
 // @Tags transactions
 // @Accept  json
 // @Produce  json
-// @Param   user_id         body  uint    true  "User ID"
-// @Param   category_id     body  uint    true  "Category ID"
-// @Param   amount          body  float64 true  "Amount"
-// @Param   description     body  string  false "Description"
-// @Param   transaction_date body string true  "Transaction Date in RFC3339 format"
+// @Param   transaction  body  handlers.TransactionRequest  true  "Transaction Data"
 // @Success 201 {object} models.Transaction "Created Transaction"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/transactions [post]
 func CreateTransactionHandler(service *transaction.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			UserID          uint    `json:"user_id"`
-			CategoryID      uint    `json:"category_id"`
-			Amount          float64 `json:"amount"`
-			Description     string  `json:"description"`
-			TransactionDate string  `json:"transaction_date"`
-		}
+		var req TransactionRequest
 
 		if err := handlers.ParseJSONRequest(w, r, &req); err != nil {
 			return
@@ -46,14 +43,19 @@ func CreateTransactionHandler(service *transaction.TransactionService) http.Hand
 			return
 		}
 
-		transaction, err := service.AddTransaction(req.UserID, req.CategoryID, req.Amount, req.Description, transactionDate)
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		transaction, err := service.AddTransaction(username, req.CategoryID, req.Amount, req.Description, transactionDate)
 		if err != nil {
 			handlers.SendErrorResponse(w, "Failed to create transaction", http.StatusInternalServerError)
 			return
 		}
 
 		handlers.SendJSONResponse(w, transaction, http.StatusCreated)
-
 	}
 }
 
@@ -126,11 +128,8 @@ func GetTransactionByIDHandler(service *transaction.TransactionService) http.Han
 // @Tags transactions
 // @Accept  json
 // @Produce  json
-// @Param   id            path  uint    true  "Transaction ID"
-// @Param   amount        body  float64 true  "Amount"
-// @Param   category_id   body  uint    true  "Category ID"
-// @Param   description   body  string  false "Description"
-// @Param   transaction_date body string true "Transaction Date in RFC3339 format"
+// @Param   id            path  uint                       true  "Transaction ID"
+// @Param   transaction   body  handlers.TransactionRequest  true  "Updated Transaction Data"
 // @Success 200 {object} models.Transaction "Updated Transaction"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 404 {object} map[string]interface{} "Transaction not found"
@@ -138,12 +137,7 @@ func GetTransactionByIDHandler(service *transaction.TransactionService) http.Han
 // @Router /api/transactions/{id} [put]
 func UpdateTransactionHandler(service *transaction.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			Amount          float64 `json:"amount"`
-			CategoryID      uint    `json:"category_id"`
-			Description     string  `json:"description"`
-			TransactionDate string  `json:"transaction_date"`
-		}
+		var req TransactionRequest
 
 		vars := mux.Vars(r)
 		transactionID, err := strconv.ParseUint(vars["id"], 10, 32)

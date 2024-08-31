@@ -5,9 +5,15 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gorilla/mux"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/handlers"
 )
+
+type CategoryRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
 
 // CreateCategoryHandler handles the creation of a new category.
 // @Summary Create Category
@@ -15,8 +21,7 @@ import (
 // @Tags categories
 // @Accept  json
 // @Produce  json
-// @Param   name        body  string  true  "Category Name"
-// @Param   description body  string  false "Category Description"
+// @Param   category  body  handlers.CategoryRequest  true  "Category"
 // @Success 201 {object} models.Category "Created Category"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
@@ -56,7 +61,8 @@ func CreateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 // @Router /api/categories/{id} [get]
 func GetCategoryByIDHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		idStr := r.URL.Query().Get("id")
+		vars := mux.Vars(r)
+		idStr := vars["id"]
 		id, err := strconv.ParseUint(idStr, 10, 32)
 		if err != nil || id == 0 {
 			handlers.SendErrorResponse(w, "Invalid Category ID", http.StatusBadRequest)
@@ -99,9 +105,8 @@ func GetAllCategoriesHandler(service *category.CategoryService) http.HandlerFunc
 // @Tags categories
 // @Accept  json
 // @Produce  json
-// @Param   id          path  int     true  "Category ID"
-// @Param   name        body  string  false "Category Name"
-// @Param   description body  string  false "Category Description"
+// @Param   id          path  int                      true  "Category ID"
+// @Param   category    body  handlers.CategoryRequest false "Category"
 // @Success 200 {object} models.Category "Updated Category"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 404 {object} map[string]interface{} "Category not found"
@@ -109,17 +114,15 @@ func GetAllCategoriesHandler(service *category.CategoryService) http.HandlerFunc
 // @Router /api/categories/{id} [put]
 func UpdateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		idStr := r.URL.Query().Get("id")
+		vars := mux.Vars(r)
+		idStr := vars["id"]
 		id, err := strconv.ParseUint(idStr, 10, 32)
 		if err != nil || id == 0 {
 			handlers.SendErrorResponse(w, "Invalid Category ID", http.StatusBadRequest)
 			return
 		}
 
-		var req struct {
-			Name        string `json:"name"`
-			Description string `json:"description"`
-		}
+		var req CategoryRequest
 
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			handlers.SendErrorResponse(w, "Invalid request payload", http.StatusBadRequest)
@@ -149,7 +152,8 @@ func UpdateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 // @Router /api/categories/{id} [delete]
 func DeleteCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		idStr := r.URL.Query().Get("id")
+		vars := mux.Vars(r)
+		idStr := vars["id"]
 		id, err := strconv.ParseUint(idStr, 10, 32)
 		if err != nil || id == 0 {
 			handlers.SendErrorResponse(w, "Invalid Category ID", http.StatusBadRequest)
