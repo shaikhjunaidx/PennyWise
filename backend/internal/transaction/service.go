@@ -1,21 +1,26 @@
 package transaction
 
 import (
+	"errors"
 	"time"
 
+	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
+	"github.com/shaikhjunaidx/pennywise-backend/internal/constants"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/user"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
 
 type TransactionService struct {
-	Repo     TransactionRepository
-	UserRepo user.UserRepository
+	Repo         TransactionRepository
+	UserRepo     user.UserRepository
+	CategoryRepo category.CategoryRepository
 }
 
-func NewTransactionService(repo TransactionRepository, userRepo user.UserRepository) *TransactionService {
+func NewTransactionService(repo TransactionRepository, userRepo user.UserRepository, categoryRepo category.CategoryRepository) *TransactionService {
 	return &TransactionService{
-		Repo: repo,
+		Repo:     repo,
 		UserRepo: userRepo,
+		CategoryRepo: categoryRepo,
 	}
 }
 
@@ -25,6 +30,14 @@ func (s *TransactionService) AddTransaction(username string, categoryID uint,
 	user, err := s.UserRepo.FindByUsername(username)
 	if err != nil {
 		return nil, err
+	}
+
+	if categoryID == 0 {
+		defaultCategory, err := s.CategoryRepo.FindByName(constants.DefaultCategoryName)
+		if err != nil {
+			return nil, errors.New("default category not found")
+		}
+		categoryID = defaultCategory.ID
 	}
 
 	transaction := &models.Transaction{

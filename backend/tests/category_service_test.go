@@ -114,3 +114,23 @@ func TestCategoryService_DeleteCategory(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 }
+
+func TestCategoryService_FindByName(t *testing.T) {
+	service, mockRepo := setupCategoryService()
+
+	categoryName := "Miscellaneous"
+	expectedCategory := &models.Category{
+		ID:          1,
+		Name:        categoryName,
+		Description: "Default category for uncategorized transactions",
+	}
+
+	mockRepo.On("FindByName", categoryName).Return(expectedCategory, nil)
+
+	result, err := service.Repo.FindByName(categoryName)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedCategory, result)
+
+	mockRepo.AssertExpectations(t)
+}

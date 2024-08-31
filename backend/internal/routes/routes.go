@@ -25,8 +25,9 @@ func SetupUserRoutes(router *mux.Router, db *gorm.DB) {
 
 func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	userRepo := user.NewUserRepository(db)
+	categoryRepo := category.NewCategoryRepository(db)
 	transactionRepo := transaction.NewTransactionRepository(db)
-	transactionService := transaction.NewTransactionService(transactionRepo, userRepo)
+	transactionService := transaction.NewTransactionService(transactionRepo, userRepo, categoryRepo)
 
 	transactionRouter := router.PathPrefix("/api/transactions").Subrouter()
 	transactionRouter.Use(middleware.JWTMiddleware)

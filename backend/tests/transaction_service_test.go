@@ -12,10 +12,11 @@ import (
 
 func setUpTransactionService() (*transaction.TransactionService, *mocks.MockTransactionRepository, *mocks.MockUserRepository) {
 	mockRepo := new(mocks.MockTransactionRepository)
+	mockCategoryRepo := new(mocks.MockCategoryRepository)
 	mockUserRepo := &mocks.MockUserRepository{
 		Users: make(map[string]*models.User),
 	}
-	service := transaction.NewTransactionService(mockRepo, mockUserRepo)
+	service := transaction.NewTransactionService(mockRepo, mockUserRepo, mockCategoryRepo)
 	return service, mockRepo, mockUserRepo
 }
 

@@ -85,3 +85,25 @@ func TestCategoryRepository_DeleteByID(t *testing.T) {
 	assert.Error(t, err) // Should return an error since the category should be deleted
 	assert.Nil(t, deletedCategory)
 }
+
+func TestCategoryRepository_FindByName(t *testing.T) {
+    repo, _ := setupCategoryTestRepo(t)
+
+    // Create a test category
+    createdCategory := createTestCategory(t, repo, "Groceries", "Expenses for groceries")
+
+    // Attempt to find the category by name
+    foundCategory, err := repo.FindByName("Groceries")
+    
+    // Validate the results
+    assert.NoError(t, err)
+    assert.NotNil(t, foundCategory)
+    assert.Equal(t, createdCategory.ID, foundCategory.ID)
+    assert.Equal(t, "Groceries", foundCategory.Name)
+    assert.Equal(t, "Expenses for groceries", foundCategory.Description)
+
+    // Attempt to find a category that doesn't exist
+    nonExistentCategory, err := repo.FindByName("NonExistent")
+    assert.Error(t, err)
+    assert.Nil(t, nonExistentCategory)
+}

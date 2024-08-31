@@ -6,12 +6,11 @@ import (
 	"os"
 
 	"github.com/shaikhjunaidx/pennywise-backend/internal/config"
+	"github.com/shaikhjunaidx/pennywise-backend/internal/constants"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
-
-const DefaultCategoryName = "General"
 
 func InitDB() *gorm.DB {
 	setEnvironment("dev")
@@ -88,17 +87,17 @@ func applyMigrations(db *gorm.DB) {
 func EnsureDefaultCategory(db *gorm.DB) error {
 	var category models.Category
 
-	err := db.Where("name = ?", DefaultCategoryName).First(&category).Error
+	err := db.Where("name = ?", constants.DefaultCategoryName).First(&category).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			defaultCategory := models.Category{
-				Name:        DefaultCategoryName,
+				Name:        constants.DefaultCategoryName,
 				Description: "Default category for uncategorized transactions",
 			}
 			if err := db.Create(&defaultCategory).Error; err != nil {
 				return err
 			}
-			log.Printf("Default category '%s' created successfully.", DefaultCategoryName)
+			log.Printf("Default category '%s' created successfully.", constants.DefaultCategoryName)
 		} else {
 			return err
 		}

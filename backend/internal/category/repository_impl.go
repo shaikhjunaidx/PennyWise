@@ -40,3 +40,11 @@ func (r *CategoryRepositoryImpl) Update(category *models.Category) error {
 func (r *CategoryRepositoryImpl) DeleteByID(id uint) error {
 	return r.DB.Delete(&models.Category{}, id).Error
 }
+
+func (r *CategoryRepositoryImpl) FindByName(name string) (*models.Category, error) {
+	var category models.Category
+	if err := r.DB.Where("name = ?", name).First(&category).Error; err != nil {
+		return nil, err
+	}
+	return &category, nil
+}

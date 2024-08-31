@@ -33,3 +33,8 @@ func (m *MockCategoryRepository) DeleteByID(id uint) error {
 	args := m.Called(id)
 	return args.Error(0)
 }
+
+func (m *MockCategoryRepository) FindByName(name string) (*models.Category, error) {
+	args := m.Called(name)
+	return args.Get(0).(*models.Category), args.Error(1)
+}
