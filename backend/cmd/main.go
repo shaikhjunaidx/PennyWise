@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/exec"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -14,6 +16,13 @@ import (
 )
 
 func main() {
+
+	err := runSwagInit()
+	if err != nil {
+		fmt.Printf("Error generating Swagger docs: %v\n", err)
+		os.Exit(1)
+	}
+
 	database := db.InitDB()
 	fmt.Println("Connected to the database:", database.Name())
 
@@ -35,4 +44,12 @@ func main() {
 
 	log.Println("Server is running on port 8080...")
 	log.Fatal(http.ListenAndServe(":8080", corsMiddleware(router)))
+}
+
+func runSwagInit() error {
+	cmd := exec.Command("swag", "init")
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
 }
