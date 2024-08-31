@@ -34,16 +34,17 @@ func (s *TransactionService) AddTransaction(userID, categoryID uint,
 	return transaction, nil
 }
 
-func (s *TransactionService) UpdateTransaction(transactionID uint,
-	amount float64, description string) (*models.Transaction, error) {
+func (s *TransactionService) UpdateTransaction(id uint, amount float64, categoryID uint, description string, transactionDate time.Time) (*models.Transaction, error) {
 
-	transaction, err := s.Repo.FindByID(transactionID)
+	transaction, err := s.Repo.FindByID(id)
 	if err != nil {
 		return nil, err
 	}
 
 	transaction.Amount = amount
+	transaction.CategoryID = categoryID
 	transaction.Description = description
+	transaction.TransactionDate = transactionDate
 
 	if err := s.Repo.Update(transaction); err != nil {
 		return nil, err
@@ -61,11 +62,19 @@ func (s *TransactionService) DeleteTransaction(transactionID uint) error {
 	return nil
 }
 
-func (s *TransactionService) GetTransactionForUser(userID uint) ([]*models.Transaction, error) {
+func (s *TransactionService) GetTransactionsForUser(userID uint) ([]*models.Transaction, error) {
 	transactions, err := s.Repo.FindAllByUserID(userID)
 	if err != nil {
 		return nil, err
 	}
 
 	return transactions, nil
+}
+
+func (s *TransactionService) GetTransactionByID(id uint) (*models.Transaction, error) {
+	transaction, err := s.Repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+	return transaction, nil
 }

@@ -51,12 +51,14 @@ func TestTransactionService_UpdateTransaction(t *testing.T) {
 	}
 
 	updatedAmount := 200.0
+	updatedCategoryID := 2
 	updatedDescription := "Updated Groceries"
+	updatedTransactionDate := time.Now().AddDate(0, 0, 1)
 
 	mockRepo.On("FindByID", transaction.ID).Return(transaction, nil)
 	mockRepo.On("Update", transaction).Return(nil)
 
-	result, err := service.UpdateTransaction(transaction.ID, updatedAmount, updatedDescription)
+	result, err := service.UpdateTransaction(transaction.ID, updatedAmount, uint(updatedCategoryID), updatedDescription, updatedTransactionDate)
 
 	assert.NoError(t, err)
 	assert.Equal(t, updatedAmount, result.Amount)
@@ -101,10 +103,42 @@ func TestTransactionService_GetTransactionsForUser(t *testing.T) {
 
 	mockRepo.On("FindAllByUserID", userID).Return(transactions, nil)
 
-	result, err := service.GetTransactionForUser(userID)
+	result, err := service.GetTransactionsForUser(userID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, transactions, result)
+
+	mockRepo.AssertExpectations(t)
+}
+
+func TestTransactionService_GetTransactionByID(t *testing.T) {
+	service, mockRepo := setUpTransactionService()
+
+	transactionID := uint(1)
+	expectedTransaction := &models.Transaction{
+		ID:              transactionID,
+		UserID:          1,
+		CategoryID:      1,
+		Amount:          100.0,
+		Description:     "Groceries",
+		TransactionDate: time.Now(),
+	}
+
+	mockRepo.On("FindByID", transactionID).Return(expectedTransaction, nil)
+
+	result, err := service.GetTransactionByID(transactionID)
+
+	assert.NoError(t, err)
+	assert.Equal(t, expectedTransaction, result)
+
+	mockRepo.AssertExpectations(t)
+
+	mockRepo.On("FindByID", transactionID).Return(nil, assert.AnError)
+
+	result, err = service.GetTransactionByID(transactionID)
+
+	assert.Error(t, err)
+	assert.Nil(t, result)
 
 	mockRepo.AssertExpectations(t)
 }
