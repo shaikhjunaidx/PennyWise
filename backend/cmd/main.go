@@ -15,12 +15,6 @@ import (
 
 func main() {
 
-	// err := runSwagInit()
-	// if err != nil {
-	// 	fmt.Printf("Error generating Swagger docs: %v\n", err)
-	// 	os.Exit(1)
-	// }
-
 	database := db.InitDB()
 	fmt.Println("Connected to the database:", database.Name())
 

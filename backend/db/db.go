@@ -11,6 +11,8 @@ import (
 	"gorm.io/gorm"
 )
 
+const DefaultCategoryName = "General"
+
 func InitDB() *gorm.DB {
 	setEnvironment("dev")
 
@@ -21,6 +23,10 @@ func InitDB() *gorm.DB {
 	db := connectToDatabase(cfg)
 
 	applyMigrations(db)
+
+	if err := EnsureDefaultCategory(db); err != nil {
+		log.Fatalf("Failed to ensure default category: %v", err)
+	}
 
 	log.Println("Connected to the database and applied migrations")
 	return db
@@ -77,4 +83,25 @@ func applyMigrations(db *gorm.DB) {
 	if err := db.AutoMigrate(&models.User{}, &models.Category{}, &models.Transaction{}); err != nil {
 		log.Fatalf("Could not migrate database schema: %v", err)
 	}
+}
+
+func EnsureDefaultCategory(db *gorm.DB) error {
+	var category models.Category
+
+	err := db.Where("name = ?", DefaultCategoryName).First(&category).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			defaultCategory := models.Category{
+				Name:        DefaultCategoryName,
+				Description: "Default category for uncategorized transactions",
+			}
+			if err := db.Create(&defaultCategory).Error; err != nil {
+				return err
+			}
+			log.Printf("Default category '%s' created successfully.", DefaultCategoryName)
+		} else {
+			return err
+		}
+	}
+	return nil
 }
