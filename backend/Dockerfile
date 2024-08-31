@@ -3,12 +3,18 @@ FROM golang:1.22-alpine AS builder
 
 WORKDIR /app
 
+# Install the swag CLI
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+
 # Cache dependencies
 COPY go.mod go.sum ./
 RUN go mod download
 
 # Copy the source code into the container
 COPY . .
+
+# Generate Swagger docs
+RUN swag init
 
 # Build the Go app
 RUN go build -o pennywise-backend ./cmd/main.go
@@ -20,6 +26,8 @@ WORKDIR /app
 
 # Copy the Pre-built binary file from the builder stage
 COPY --from=builder /app/pennywise-backend .
+# Copy the generated Swagger docs
+COPY --from=builder /app/docs ./docs  
 
 # Install Go in the final image to run the script
 RUN apk add --no-cache go
