@@ -111,7 +111,7 @@ func TestTransactionService_GetTransactionsForUser(t *testing.T) {
 	mockRepo.AssertExpectations(t)
 }
 
-func TestTransactionService_GetTransactionByID(t *testing.T) {
+func TestTransactionService_GetTransactionByID_Success(t *testing.T) {
 	service, mockRepo := setUpTransactionService()
 
 	transactionID := uint(1)
@@ -132,10 +132,16 @@ func TestTransactionService_GetTransactionByID(t *testing.T) {
 	assert.Equal(t, expectedTransaction, result)
 
 	mockRepo.AssertExpectations(t)
+}
 
-	mockRepo.On("FindByID", transactionID).Return(nil, assert.AnError)
+func TestTransactionService_GetTransactionByID_NotFound(t *testing.T) {
+	service, mockRepo := setUpTransactionService()
 
-	result, err = service.GetTransactionByID(transactionID)
+	transactionID := uint(1)
+
+	mockRepo.On("FindByID", transactionID).Return((*models.Transaction)(nil), assert.AnError)
+
+	result, err := service.GetTransactionByID(transactionID)
 
 	assert.Error(t, err)
 	assert.Nil(t, result)
