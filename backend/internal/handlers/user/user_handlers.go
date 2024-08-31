@@ -12,26 +12,31 @@ type UserResponse struct {
 	Email    string `json:"email"`
 }
 
+type LoginRequest struct {
+	Username string `json:"username" example:"john_doe"`
+	Password string `json:"password" example:"password123"`
+}
+
+type SignUpRequest struct {
+	Username string `json:"username" example:"john_doe"`
+	Email    string `json:"email" example:"john.doe@example.com"`
+	Password string `json:"password" example:"password123"`
+}
+
 // SignUpHandler handles user registration requests.
 // @Summary User Registration
 // @Description Registers a new user with the given username, email, and password.
 // @Tags auth
 // @Accept  json
 // @Produce  json
-// @Param   username  body  string  true  "Username"
-// @Param   email     body  string  true  "Email"
-// @Param   password  body  string  true  "Password"
+// @Param   signupData  body  SignUpRequest  true  "Sign Up Data"
 // @Success 201 {object} UserResponse "Created User"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/signup [post]
 func SignUpHandler(s *user.UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			Username string `json:"username"`
-			Email    string `json:"email"`
-			Password string `json:"password"`
-		}
+		var req SignUpRequest
 
 		if err := handlers.ParseJSONRequest(w, r, &req); err != nil {
 			return
@@ -53,18 +58,14 @@ func SignUpHandler(s *user.UserService) http.HandlerFunc {
 // @Tags auth
 // @Accept  json
 // @Produce  json
-// @Param   username  body  string  true  "Username"
-// @Param   password  body  string  true  "Password"
+// @Param   loginData  body  LoginRequest  true  "Login Data"
 // @Success 200 {object} map[string]string "token"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 401 {object} map[string]interface{} "Unauthorized"
 // @Router /api/login [post]
 func LoginHandler(s *user.UserService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
-		}
+		var req LoginRequest
 
 		if err := handlers.ParseJSONRequest(w, r, &req); err != nil {
 			return

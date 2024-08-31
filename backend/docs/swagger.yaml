@@ -6,6 +6,27 @@ definitions:
       name:
         type: string
     type: object
+  handlers.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: john_doe
+        type: string
+    type: object
+  handlers.SignUpRequest:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      password:
+        example: password123
+        type: string
+      username:
+        example: john_doe
+        type: string
+    type: object
   handlers.TransactionRequest:
     properties:
       amount:
@@ -221,18 +242,12 @@ paths:
       - application/json
       description: Authenticates a user and returns a JWT token.
       parameters:
-      - description: Username
+      - description: Login Data
         in: body
-        name: username
+        name: loginData
         required: true
         schema:
-          type: string
-      - description: Password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/handlers.LoginRequest'
       produces:
       - application/json
       responses:
@@ -261,24 +276,12 @@ paths:
       - application/json
       description: Registers a new user with the given username, email, and password.
       parameters:
-      - description: Username
+      - description: Sign Up Data
         in: body
-        name: username
+        name: signupData
         required: true
         schema:
-          type: string
-      - description: Email
-        in: body
-        name: email
-        required: true
-        schema:
-          type: string
-      - description: Password
-        in: body
-        name: password
-        required: true
-        schema:
-          type: string
+          $ref: '#/definitions/handlers.SignUpRequest'
       produces:
       - application/json
       responses:
