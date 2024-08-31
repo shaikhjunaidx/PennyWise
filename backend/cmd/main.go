@@ -21,6 +21,7 @@ func main() {
 
 	routes.SetupUserRoutes(router, database)
 	routes.SetupTransactionRoutes(router, database)
+	routes.SetupCategoryRoutes(router, database)
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

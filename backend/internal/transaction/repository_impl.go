@@ -14,11 +14,29 @@ func NewTransactionRepository(db *gorm.DB) *TransactionRepositoryImpl {
 }
 
 func (r *TransactionRepositoryImpl) Create(transaction *models.Transaction) error {
-	return r.DB.Create(transaction).Error
+	if err := r.DB.Create(transaction).Error; err != nil {
+		return err
+	}
+
+	if err := r.DB.Preload("User").Preload("Category").
+		First(transaction, transaction.ID).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *TransactionRepositoryImpl) Update(transaction *models.Transaction) error {
-	return r.DB.Save(transaction).Error
+	if err := r.DB.Save(transaction).Error; err != nil {
+		return err
+	}
+
+	if err := r.DB.Preload("User").Preload("Category").
+		First(transaction, transaction.ID).Error; err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *TransactionRepositoryImpl) DeleteByID(id uint) error {
@@ -28,7 +46,8 @@ func (r *TransactionRepositoryImpl) DeleteByID(id uint) error {
 func (r *TransactionRepositoryImpl) FindByID(id uint) (*models.Transaction, error) {
 	var transaction models.Transaction
 
-	if err := r.DB.First(&transaction, id).Error; err != nil {
+	if err := r.DB.Preload("User").Preload("Category").
+		First(&transaction, id).Error; err != nil {
 		return nil, err
 	}
 

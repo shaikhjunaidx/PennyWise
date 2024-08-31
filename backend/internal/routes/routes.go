@@ -3,6 +3,8 @@ package routes
 import (
 	"github.com/gorilla/mux"
 
+	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
+	handlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/category"
 	transactionHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/transaction"
 	userHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/user"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/middleware"
@@ -33,5 +35,17 @@ func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	transactionRouter.HandleFunc("/{id:[0-9]+}", transactionHandlers.DeleteTransactionHandler(transactionService)).Methods("DELETE")
 	transactionRouter.HandleFunc("/{id:[0-9]+}", transactionHandlers.GetTransactionByIDHandler(transactionService)).Methods("GET")
 	transactionRouter.HandleFunc("", transactionHandlers.GetTransactionsHandler(transactionService)).Methods("GET")
+}
 
+func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
+	categoryRepo := category.NewCategoryRepository(db)
+	categoryService := category.NewCategoryService(categoryRepo)
+
+	categoryRouter := router.PathPrefix("/api/categories").Subrouter()
+
+	categoryRouter.HandleFunc("", handlers.CreateCategoryHandler(categoryService)).Methods("POST")
+	categoryRouter.HandleFunc("/{id:[0-9]+}", handlers.GetCategoryByIDHandler(categoryService)).Methods("GET")
+	categoryRouter.HandleFunc("", handlers.GetAllCategoriesHandler(categoryService)).Methods("GET")
+	categoryRouter.HandleFunc("/{id:[0-9]+}", handlers.UpdateCategoryHandler(categoryService)).Methods("PUT")
+	categoryRouter.HandleFunc("/{id:[0-9]+}", handlers.DeleteCategoryHandler(categoryService)).Methods("DELETE")
 }
