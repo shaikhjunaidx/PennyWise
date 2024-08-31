@@ -21,7 +21,7 @@ func SetupUserRoutes(router *mux.Router, db *gorm.DB) {
 	router.HandleFunc("/api/login", userHandlers.LoginHandler(userService)).Methods("POST")
 }
 
-func SetupTransactionROutes(router *mux.Router, db *gorm.DB) {
+func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	transactionRepo := transaction.NewTransactionRepository(db)
 	transactionService := transaction.NewTransactionService(transactionRepo)
 

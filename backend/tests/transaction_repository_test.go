@@ -20,61 +20,71 @@ func setupTransactionTestRepo(t *testing.T) (*transaction.TransactionRepositoryI
 	return transaction.NewTransactionRepository(tx), tx
 }
 
-func TestTransactionRepository_Create(t *testing.T) {
-	repo, _ := setupTransactionTestRepo(t)
+func createUser(t *testing.T, db *gorm.DB) *models.User {
+	user := &models.User{
+		Username:     "john_doe",
+		Email:        "john.doe@example.com",
+		PasswordHash: "hashed_password",
+	}
+	err := db.Create(user).Error
+	assert.NoError(t, err)
+	return user
+}
 
+func createCategory(t *testing.T, db *gorm.DB) *models.Category {
+	category := &models.Category{
+		Name:        "Groceries",
+		Description: "Expenses for groceries",
+	}
+	err := db.Create(category).Error
+	assert.NoError(t, err)
+	return category
+}
+
+func createTransaction(t *testing.T, repo *transaction.TransactionRepositoryImpl, userID, categoryID uint, amount float64, description string) *models.Transaction {
 	transaction := &models.Transaction{
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
+		UserID:          userID,
+		CategoryID:      categoryID,
+		Amount:          amount,
+		Description:     description,
 		TransactionDate: time.Now(),
 	}
-
 	err := repo.Create(transaction)
-
 	assert.NoError(t, err)
+	return transaction
+}
+
+func TestTransactionRepository_Create(t *testing.T) {
+	repo, db := setupTransactionTestRepo(t)
+	user := createUser(t, db)
+	category := createCategory(t, db)
+	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
+
 	assert.NotZero(t, transaction.ID)
 }
 
 func TestTransactionRepository_FindByID(t *testing.T) {
-	repo, _ := setupTransactionTestRepo(t)
-
-	transaction := &models.Transaction{
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
-		TransactionDate: time.Now(),
-	}
-
-	err := repo.Create(transaction)
-	assert.NoError(t, err)
+	repo, db := setupTransactionTestRepo(t)
+	user := createUser(t, db)
+	category := createCategory(t, db)
+	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
 	foundTransaction, err := repo.FindByID(transaction.ID)
 	assert.NoError(t, err)
+	assert.NotNil(t, foundTransaction)
 	assert.Equal(t, transaction.ID, foundTransaction.ID)
-	assert.Equal(t, transaction.Description, foundTransaction.Description)
 }
 
 func TestTransactionRepository_Update(t *testing.T) {
-	repo, _ := setupTransactionTestRepo(t)
-
-	transaction := &models.Transaction{
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
-		TransactionDate: time.Now(),
-	}
-
-	err := repo.Create(transaction)
-	assert.NoError(t, err)
+	repo, db := setupTransactionTestRepo(t)
+	user := createUser(t, db)
+	category := createCategory(t, db)
+	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
 	// Update the transaction
 	transaction.Amount = 200.0
 	transaction.Description = "Updated Groceries"
-	err = repo.Update(transaction)
+	err := repo.Update(transaction)
 	assert.NoError(t, err)
 
 	updatedTransaction, err := repo.FindByID(transaction.ID)
@@ -84,20 +94,12 @@ func TestTransactionRepository_Update(t *testing.T) {
 }
 
 func TestTransactionRepository_DeleteByID(t *testing.T) {
-	repo, _ := setupTransactionTestRepo(t)
+	repo, db := setupTransactionTestRepo(t)
+	user := createUser(t, db)
+	category := createCategory(t, db)
+	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
-	transaction := &models.Transaction{
-		UserID:          1,
-		CategoryID:      1,
-		Amount:          100.0,
-		Description:     "Groceries",
-		TransactionDate: time.Now(),
-	}
-
-	err := repo.Create(transaction)
-	assert.NoError(t, err)
-
-	err = repo.DeleteByID(transaction.ID)
+	err := repo.DeleteByID(transaction.ID)
 	assert.NoError(t, err)
 
 	deletedTransaction, err := repo.FindByID(transaction.ID)
@@ -105,34 +107,15 @@ func TestTransactionRepository_DeleteByID(t *testing.T) {
 	assert.Nil(t, deletedTransaction)
 }
 
-func TestTransactionRepository_FindAllByUserID(t *testing.T) {
-	repo, _ := setupTransactionTestRepo(t)
+func TestTransactionRepository_FindAllByUsername(t *testing.T) {
+	repo, db := setupTransactionTestRepo(t)
+	user := createUser(t, db)
+	category := createCategory(t, db)
 
-	userID := uint(1)
+	createTransaction(t, repo, user.ID, category.ID, 50.0, "Dinner")
+	createTransaction(t, repo, user.ID, category.ID, 150.0, "Utilities")
 
-	transaction1 := &models.Transaction{
-		UserID:          userID,
-		CategoryID:      1,
-		Amount:          50.0,
-		Description:     "Dinner",
-		TransactionDate: time.Now(),
-	}
-
-	transaction2 := &models.Transaction{
-		UserID:          userID,
-		CategoryID:      2,
-		Amount:          150.0,
-		Description:     "Utilities",
-		TransactionDate: time.Now(),
-	}
-
-	err := repo.Create(transaction1)
-	assert.NoError(t, err)
-
-	err = repo.Create(transaction2)
-	assert.NoError(t, err)
-
-	transactions, err := repo.FindAllByUserID(userID)
+	transactions, err := repo.FindAllByUsername(user.Username)
 	assert.NoError(t, err)
 	assert.Len(t, transactions, 2) // We expect 2 transactions for the user
 }

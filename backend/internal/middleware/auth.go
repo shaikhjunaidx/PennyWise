@@ -9,9 +9,9 @@ import (
 	"github.com/golang-jwt/jwt/v4"
 )
 
-type contextKey string
+type ContextKey string
 
-const userIDKey contextKey = "userID"
+const UsernameKey ContextKey = "username"
 
 func JWTMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,7 @@ func JWTMiddleware(next http.Handler) http.Handler {
 			return
 		}
 
-		ctx := context.WithValue(r.Context(), userIDKey, claims.Subject)
+		ctx := context.WithValue(r.Context(), UsernameKey, claims.Subject)
 		next.ServeHTTP(w, r.WithContext(ctx))
 
 	})

@@ -29,7 +29,7 @@ func (m *MockTransactionRepository) FindByID(id uint) (*models.Transaction, erro
 	return args.Get(0).(*models.Transaction), args.Error(1)
 }
 
-func (m *MockTransactionRepository) FindAllByUserID(userID uint) ([]*models.Transaction, error) {
-	args := m.Called(userID)
+func (m *MockTransactionRepository) FindAllByUsername(username string) ([]*models.Transaction, error) {
+	args := m.Called(username)
 	return args.Get(0).([]*models.Transaction), args.Error(1)
 }

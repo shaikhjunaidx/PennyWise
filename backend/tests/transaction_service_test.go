@@ -83,17 +83,17 @@ func TestTransactionService_DeleteTransaction(t *testing.T) {
 func TestTransactionService_GetTransactionsForUser(t *testing.T) {
 	service, mockRepo := setUpTransactionService()
 
-	userID := uint(1)
+	username := "john_doe"
 	transactions := []*models.Transaction{
 		{
-			UserID:          userID,
+			UserID:          1,
 			CategoryID:      1,
 			Amount:          50.0,
 			Description:     "Dinner",
 			TransactionDate: time.Now(),
 		},
 		{
-			UserID:          userID,
+			UserID:          1,
 			CategoryID:      2,
 			Amount:          150.0,
 			Description:     "Utilities",
@@ -101,9 +101,9 @@ func TestTransactionService_GetTransactionsForUser(t *testing.T) {
 		},
 	}
 
-	mockRepo.On("FindAllByUserID", userID).Return(transactions, nil)
+	mockRepo.On("FindAllByUsername", username).Return(transactions, nil)
 
-	result, err := service.GetTransactionsForUser(userID)
+	result, err := service.GetTransactionsForUser(username)
 
 	assert.NoError(t, err)
 	assert.Equal(t, transactions, result)

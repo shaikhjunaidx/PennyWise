@@ -20,6 +20,7 @@ func main() {
 	router := mux.NewRouter()
 
 	routes.SetupUserRoutes(router, database)
+	routes.SetupTransactionRoutes(router, database)
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 

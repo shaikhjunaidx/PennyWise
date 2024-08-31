@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/handlers"
+	"github.com/shaikhjunaidx/pennywise-backend/internal/middleware"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/transaction"
 )
 
@@ -68,14 +69,14 @@ func CreateTransactionHandler(service *transaction.TransactionService) http.Hand
 // @Router /api/transactions [get]
 func GetTransactionsHandler(service *transaction.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userIDStr := r.URL.Query().Get("user_id")
-		userID, err := strconv.ParseUint(userIDStr, 10, 32)
-		if err != nil || userID == 0 {
-			handlers.SendErrorResponse(w, "Invalid or missing user ID", http.StatusBadRequest)
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username  not found in context", http.StatusUnauthorized)
 			return
 		}
 
-		transactions, err := service.GetTransactionsForUser(uint(userID))
+		transactions, err := service.GetTransactionsForUser(username)
 		if err != nil {
 			handlers.SendErrorResponse(w, "Failed to retrieve transactions", http.StatusInternalServerError)
 			return

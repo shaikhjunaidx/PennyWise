@@ -62,8 +62,8 @@ func (s *TransactionService) DeleteTransaction(transactionID uint) error {
 	return nil
 }
 
-func (s *TransactionService) GetTransactionsForUser(userID uint) ([]*models.Transaction, error) {
-	transactions, err := s.Repo.FindAllByUserID(userID)
+func (s *TransactionService) GetTransactionsForUser(username string) ([]*models.Transaction, error) {
+	transactions, err := s.Repo.FindAllByUsername(username)
 	if err != nil {
 		return nil, err
 	}
