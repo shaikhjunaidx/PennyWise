@@ -48,3 +48,11 @@ func (r *CategoryRepositoryImpl) FindByName(name string) (*models.Category, erro
 	}
 	return &category, nil
 }
+
+func (r *CategoryRepositoryImpl) FindAllByUserID(userID uint) ([]*models.Category, error) {
+	var categories []*models.Category
+	if err := r.DB.Where("user_id = ?", userID).Find(&categories).Error; err != nil {
+		return nil, err
+	}
+	return categories, nil
+}
