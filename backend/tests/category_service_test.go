@@ -4,48 +4,67 @@ import (
 	"testing"
 
 	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
+	"github.com/shaikhjunaidx/pennywise-backend/internal/user"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 	"github.com/shaikhjunaidx/pennywise-backend/tests/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
-func setupCategoryService() (*category.CategoryService, *mocks.MockCategoryRepository) {
-	mockRepo := new(mocks.MockCategoryRepository)
-	service := category.NewCategoryService(mockRepo)
-	return service, mockRepo
+func setupCategoryService() (*category.CategoryService, *mocks.MockCategoryRepository, *mocks.MockUserRepository) {
+	mockCategoryRepo := new(mocks.MockCategoryRepository)
+	mockUserRepo := &mocks.MockUserRepository{
+		Users: make(map[string]*models.User),
+	}
+
+	userService := &user.UserService{Repo: mockUserRepo}
+
+	service := category.NewCategoryService(mockCategoryRepo, userService)
+	return service, mockCategoryRepo, mockUserRepo
 }
 
 func TestCategoryService_AddCategory(t *testing.T) {
-	service, mockRepo := setupCategoryService()
+	service, mockRepo, mockUserRepo := setupCategoryService()
+
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
 
 	category := &models.Category{
+		UserID:      user.ID,
 		Name:        "Groceries",
 		Description: "Expenses for groceries",
 	}
 
-	mockRepo.On("Create", category).Return(nil)
+	mockRepo.On("Create", mock.Anything).Return(nil)
 
-	result, err := service.AddCategory(category.Name, category.Description)
+	result, err := service.AddCategory(username, category.Name, category.Description)
 
 	assert.NoError(t, err)
-	assert.Equal(t, category, result)
+	assert.NotNil(t, result)
+	assert.Equal(t, category.UserID, result.UserID)
+	assert.Equal(t, category.Name, result.Name)
+	assert.Equal(t, category.Description, result.Description)
 
 	mockRepo.AssertExpectations(t)
 }
 
 func TestCategoryService_GetCategoryByID(t *testing.T) {
-	service, mockRepo := setupCategoryService()
+	service, mockRepo, mockUserRepo := setupCategoryService()
+
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
 
 	categoryID := uint(1)
 	expectedCategory := &models.Category{
 		ID:          categoryID,
+		UserID:      user.ID,
 		Name:        "Groceries",
 		Description: "Expenses for groceries",
 	}
 
 	mockRepo.On("FindByID", categoryID).Return(expectedCategory, nil)
 
-	result, err := service.GetCategoryByID(categoryID)
+	result, err := service.GetCategoryByID(username, categoryID)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedCategory, result)
@@ -54,22 +73,27 @@ func TestCategoryService_GetCategoryByID(t *testing.T) {
 }
 
 func TestCategoryService_GetAllCategories(t *testing.T) {
-	service, mockRepo := setupCategoryService()
+	service, mockRepo, mockUserRepo := setupCategoryService()
+
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
 
 	expectedCategories := []*models.Category{
 		{
+			UserID:      user.ID,
 			Name:        "Groceries",
 			Description: "Expenses for groceries",
 		},
 		{
+			UserID:      user.ID,
 			Name:        "Utilities",
 			Description: "Expenses for utilities",
 		},
 	}
 
-	mockRepo.On("FindAll").Return(expectedCategories, nil)
+	mockRepo.On("FindAllByUserID", user.ID).Return(expectedCategories, nil)
 
-	result, err := service.GetAllCategories()
+	result, err := service.GetAllCategories(username)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedCategories, result)
@@ -78,11 +102,15 @@ func TestCategoryService_GetAllCategories(t *testing.T) {
 }
 
 func TestCategoryService_UpdateCategory(t *testing.T) {
-	service, mockRepo := setupCategoryService()
+	service, mockRepo, mockUserRepo := setupCategoryService()
+
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
 
 	categoryID := uint(1)
 	existingCategory := &models.Category{
 		ID:          categoryID,
+		UserID:      user.ID,
 		Name:        "Groceries",
 		Description: "Expenses for groceries",
 	}
@@ -91,9 +119,9 @@ func TestCategoryService_UpdateCategory(t *testing.T) {
 	updatedDescription := "Updated description"
 
 	mockRepo.On("FindByID", categoryID).Return(existingCategory, nil)
-	mockRepo.On("Update", existingCategory).Return(nil)
+	mockRepo.On("Update", mock.Anything).Return(nil)
 
-	result, err := service.UpdateCategory(categoryID, updatedName, updatedDescription)
+	result, err := service.UpdateCategory(username, categoryID, updatedName, updatedDescription)
 
 	assert.NoError(t, err)
 	assert.Equal(t, updatedName, result.Name)
@@ -103,20 +131,32 @@ func TestCategoryService_UpdateCategory(t *testing.T) {
 }
 
 func TestCategoryService_DeleteCategory(t *testing.T) {
-	service, mockRepo := setupCategoryService()
+	service, mockRepo, mockUserRepo := setupCategoryService()
+
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
 
 	categoryID := uint(1)
+	existingCategory := &models.Category{
+		ID:     categoryID,
+		UserID: user.ID,
+		Name:   "Groceries",
+	}
 
+	mockRepo.On("FindByID", categoryID).Return(existingCategory, nil)
 	mockRepo.On("DeleteByID", categoryID).Return(nil)
 
-	err := service.DeleteCategory(categoryID)
+	err := service.DeleteCategory(username, categoryID)
 	assert.NoError(t, err)
 
 	mockRepo.AssertExpectations(t)
 }
 
 func TestCategoryService_FindByName(t *testing.T) {
-	service, mockRepo := setupCategoryService()
+	service, mockRepo, mockUserRepo := setupCategoryService()
+
+	username := "john_doe"
+	createTestUser(mockUserRepo, username, 1)
 
 	categoryName := "Miscellaneous"
 	expectedCategory := &models.Category{

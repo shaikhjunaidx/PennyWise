@@ -19,8 +19,20 @@ func setupCategoryTestRepo(t *testing.T) (*category.CategoryRepositoryImpl, *gor
 	return category.NewCategoryRepository(tx), tx
 }
 
-func createTestCategory(t *testing.T, repo *category.CategoryRepositoryImpl, name, description string) *models.Category {
+func createCategoryRepoTestUser(t *testing.T, tx *gorm.DB, username string) *models.User {
+	user := &models.User{
+		Username: username,
+		Email:    username + "@example.com",
+	}
+	err := tx.Create(user).Error
+	assert.NoError(t, err)
+	assert.NotZero(t, user.ID)
+	return user
+}
+
+func createTestCategory(t *testing.T, repo *category.CategoryRepositoryImpl, userID uint, name, description string) *models.Category {
 	category := &models.Category{
+		UserID:      userID,
 		Name:        name,
 		Description: description,
 	}
@@ -31,14 +43,17 @@ func createTestCategory(t *testing.T, repo *category.CategoryRepositoryImpl, nam
 }
 
 func TestCategoryRepository_Create(t *testing.T) {
-	repo, _ := setupCategoryTestRepo(t)
-	createTestCategory(t, repo, "Groceries", "Expenses for groceries")
+	repo, tx := setupCategoryTestRepo(t)
+
+	user := createCategoryRepoTestUser(t, tx, "john_doe")
+	createTestCategory(t, repo, user.ID, "Groceries", "Expenses for groceries")
 }
 
 func TestCategoryRepository_FindByID(t *testing.T) {
-	repo, _ := setupCategoryTestRepo(t)
+	repo, tx := setupCategoryTestRepo(t)
 
-	category := createTestCategory(t, repo, "Groceries", "Expenses for groceries")
+	user := createCategoryRepoTestUser(t, tx, "john_doe")
+	category := createTestCategory(t, repo, user.ID, "Groceries", "Expenses for groceries")
 
 	foundCategory, err := repo.FindByID(category.ID)
 	assert.NoError(t, err)
@@ -46,21 +61,23 @@ func TestCategoryRepository_FindByID(t *testing.T) {
 	assert.Equal(t, category.ID, foundCategory.ID)
 }
 
-func TestCategoryRepository_FindAll(t *testing.T) {
-	repo, _ := setupCategoryTestRepo(t)
+func TestCategoryRepository_FindAllByUserID(t *testing.T) {
+	repo, tx := setupCategoryTestRepo(t)
 
-	createTestCategory(t, repo, "Groceries", "Expenses for groceries")
-	createTestCategory(t, repo, "Utilities", "Expenses for utilities")
+	user := createCategoryRepoTestUser(t, tx, "john_doe")
+	createTestCategory(t, repo, user.ID, "Groceries", "Expenses for groceries")
+	createTestCategory(t, repo, user.ID, "Utilities", "Expenses for utilities")
 
-	categories, err := repo.FindAll()
+	categories, err := repo.FindAllByUserID(user.ID)
 	assert.NoError(t, err)
 	assert.Len(t, categories, 2)
 }
 
 func TestCategoryRepository_Update(t *testing.T) {
-	repo, _ := setupCategoryTestRepo(t)
+	repo, tx := setupCategoryTestRepo(t)
 
-	category := createTestCategory(t, repo, "Groceries", "Expenses for groceries")
+	user := createCategoryRepoTestUser(t, tx, "john_doe")
+	category := createTestCategory(t, repo, user.ID, "Groceries", "Expenses for groceries")
 
 	category.Name = "Updated Groceries"
 	category.Description = "Updated description"
@@ -74,9 +91,10 @@ func TestCategoryRepository_Update(t *testing.T) {
 }
 
 func TestCategoryRepository_DeleteByID(t *testing.T) {
-	repo, _ := setupCategoryTestRepo(t)
+	repo, tx := setupCategoryTestRepo(t)
 
-	category := createTestCategory(t, repo, "Groceries", "Expenses for groceries")
+	user := createCategoryRepoTestUser(t, tx, "john_doe")
+	category := createTestCategory(t, repo, user.ID, "Groceries", "Expenses for groceries")
 
 	err := repo.DeleteByID(category.ID)
 	assert.NoError(t, err)
@@ -87,23 +105,19 @@ func TestCategoryRepository_DeleteByID(t *testing.T) {
 }
 
 func TestCategoryRepository_FindByName(t *testing.T) {
-    repo, _ := setupCategoryTestRepo(t)
+	repo, tx := setupCategoryTestRepo(t)
 
-    // Create a test category
-    createdCategory := createTestCategory(t, repo, "Groceries", "Expenses for groceries")
+	user := createCategoryRepoTestUser(t, tx, "john_doe")
+	createdCategory := createTestCategory(t, repo, user.ID, "Groceries", "Expenses for groceries")
 
-    // Attempt to find the category by name
-    foundCategory, err := repo.FindByName("Groceries")
-    
-    // Validate the results
-    assert.NoError(t, err)
-    assert.NotNil(t, foundCategory)
-    assert.Equal(t, createdCategory.ID, foundCategory.ID)
-    assert.Equal(t, "Groceries", foundCategory.Name)
-    assert.Equal(t, "Expenses for groceries", foundCategory.Description)
+	foundCategory, err := repo.FindByName("Groceries")
+	assert.NoError(t, err)
+	assert.NotNil(t, foundCategory)
+	assert.Equal(t, createdCategory.ID, foundCategory.ID)
+	assert.Equal(t, "Groceries", foundCategory.Name)
+	assert.Equal(t, "Expenses for groceries", foundCategory.Description)
 
-    // Attempt to find a category that doesn't exist
-    nonExistentCategory, err := repo.FindByName("NonExistent")
-    assert.Error(t, err)
-    assert.Nil(t, nonExistentCategory)
+	nonExistentCategory, err := repo.FindByName("NonExistent")
+	assert.Error(t, err)
+	assert.Nil(t, nonExistentCategory)
 }
