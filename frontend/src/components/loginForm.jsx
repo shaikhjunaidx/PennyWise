@@ -7,6 +7,7 @@ const LoginForm = ({ closeForm }) => {
     const navigate=useNavigate();
 
     const handleSubmit = async (e) => {
+        navigate("/dashboard");
         e.preventDefault();
 
         try {
@@ -35,7 +36,6 @@ const LoginForm = ({ closeForm }) => {
         }
     };
     
-    console.log("Here")
     return (
         <div className="loginFormBackground" onClick={closeForm}>
             <div className="loginFormContainer" onClick={(e) => e.stopPropagation()}>
