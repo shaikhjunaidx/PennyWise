@@ -47,9 +47,9 @@ func TestBudgetService_CreateBudget(t *testing.T) {
 	result, err := service.CreateBudget(username, budget.CategoryID, budget.AmountLimit, budget.BudgetMonth, budget.BudgetYear)
 
 	assert.NoError(t, err)
-	assert.Equal(t, user.ID, result.UserID)
-	assert.Equal(t, 1000.0, result.RemainingAmount)
-	assert.Equal(t, 0.0, result.SpentAmount)
+	assert.Equal(t, budget.UserID, result.UserID)
+	assert.Equal(t, budget.RemainingAmount, result.RemainingAmount)
+	assert.Equal(t, budget.SpentAmount, result.SpentAmount)
 
 	mockRepo.AssertExpectations(t)
 }
