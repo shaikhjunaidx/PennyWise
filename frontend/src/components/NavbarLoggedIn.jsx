@@ -1,11 +1,13 @@
-// src/components/Navbar.jsx
-
 import React from 'react';
 import logo from './finance.png';
-import './Navbar.css'
+import './NavbarLoggedIn.css';
 
+function NavbarLoggedIn() {
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    window.location.href = 'http://localhost:5173/';
+  };
 
-function Navbar() {
   return (
     <nav className="navbar">
       <div className="navcontainer">
@@ -13,9 +15,12 @@ function Navbar() {
           <img src={logo} alt="Logo" className="navlogo" />
           PennyWise
         </a>
+        <button className="logout-button" onClick={handleLogout}>
+          Logout
+        </button>
       </div>
     </nav>
   );
 }
 
-export default Navbar;
+export default NavbarLoggedIn;

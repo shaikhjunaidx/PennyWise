@@ -1,0 +1,50 @@
+.navbar {
+  background-color: #3586ff;
+  display: flex;
+  align-items: center; /* Align items vertically in the center */
+  position: sticky; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000; 
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+  padding: 0.5rem 1rem;
+}
+
+.navcontainer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  width: 100%;
+}
+
+.navbar-brand {
+  font-size: 1.5rem; 
+  font-weight: bold;
+  font-family: Helvetica, sans-serif;
+  text-decoration: none;
+  color: white; 
+  display: flex;
+  align-items: center;
+}
+
+.navlogo {
+  height: 3rem;
+  width: auto;
+  margin-right: 0.5rem; 
+}
+
+.logout-button {
+  background-color: #ff4d4d;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: auto;
+}
+
+.logout-button:hover {
+  background-color: #e04343;
+}

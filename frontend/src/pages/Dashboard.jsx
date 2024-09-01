@@ -1,27 +1,10 @@
 import React, { useState,useEffect } from "react";
-import Navbar from "../components/Navbar";
+import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import './Dashboard.css';
 import './AddTransactionForm.css';
 import AddTransactionForm from "../components/AddTransactionForm";
-
-const transactions = [
-  {
-    id: 1,
-    user_id: 101,
-    category_id: 5,
-    amount: 150.75,
-    description: "Health",
-    transaction_date: "2024-08-29 14:30:00",
-  },
-  {
-    id: 2,
-    user_id: 101,
-    category_id: 3,
-    amount: 20.0,
-    description: "Food",
-    transaction_date: "2024-08-30 09:15:00",
-  }
-];
+import BudgetSummary from "../components/BudgetSummary";
+import './BudgetSummary.css';
 
 const Dashboard = () => {
   const [showAll, setShowAll] = useState(false);
@@ -31,6 +14,11 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [showAddTransForm, setShowAddTransForm] = useState(false);
 
+    const [budget, setBudget] = useState({
+        total: 250, 
+        spent: 200 
+      });
+
   useEffect(() => {
     const fetchTransactions = async () => {
       try {
@@ -39,12 +27,11 @@ const Dashboard = () => {
           throw new Error("No token found");
         }
 
-        const response = await fetch("/api/transactions", {
+        const response = await fetch("http://localhost:8080/api/transactions", {
           method: "GET",
           headers: {
             "Authorization": `Bearer ${token}`,
-            "Content-Type": "application/json",
-            "Category":0
+            "Content-Type": "application/json"
           }
         });
 
@@ -53,7 +40,7 @@ const Dashboard = () => {
         }
 
         const data = await response.json();
-        setTransactions(data.transactions);
+        setTransactions(data);
       } catch (error) {
         setError(error.message);
       } finally {
@@ -72,22 +59,26 @@ const Dashboard = () => {
     setShowAddTransForm(true); 
   };
 
-  const closehandleAddTransactionClick = () => {
+   const closehandleAddTransactionClick = (newTransaction) => {
     setShowAddTransForm(false); 
+
+    if (newTransaction) {
+      fetchTransactions();
+    }
   };
 
 
-
   const displayedTransactions = showAll ? transactions : transactions.slice(0, 6);
+  const progressPercentage = (budget.spent / budget.total) * 100;
 
   return (
     <>
-      <Navbar />
+      <NavbarLoggedIn />
       <div className="DashboardCont">
-      {showAddTransForm && <AddTransactionForm closeForm={closehandleAddTransactionClick} />}
+      {showAddTransForm && <AddTransactionForm onAddTransaction={closehandleAddTransactionClick} />}
       
-        <section id="overall">
-          <progress className="overallProgress" value={80} max={100}></progress>
+        <section id="overall" className="overalls">
+            <BudgetSummary budget={budget} heading="Months Budget" color="hsl(355, 57%, 57%)" />
         </section>
 
         <section id="Transactions" className="Transactions">
@@ -97,7 +88,6 @@ const Dashboard = () => {
               <thead>
                 <tr>
                   <th>Transaction ID</th>
-                  <th>User ID</th>
                   <th>Category</th>
                   <th>Amount</th>
                   <th>Description</th>
@@ -108,7 +98,6 @@ const Dashboard = () => {
                 {displayedTransactions.map((transaction) => (
                   <tr key={transaction.id}>
                     <td>{transaction.id}</td>
-                    <td>{transaction.user_id}</td>
                     <td>{transaction.category_id}</td>
                     <td>{transaction.amount.toFixed(2)}</td>
                     <td>{transaction.description || "N/A"}</td>

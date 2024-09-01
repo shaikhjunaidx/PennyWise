@@ -4,7 +4,7 @@ import { jwtDecode } from 'jwt-decode';
 const AddTransactionForm = ({ onAddTransaction }) => {
     console.log('here')
   const [formData, setFormData] = useState({
-    category_id: '',
+    category_id: 0,
     description: '',
     amount: '',
     transaction_date: ''
@@ -22,9 +22,12 @@ const AddTransactionForm = ({ onAddTransaction }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    const updatedValue =
+      name === "category_id" ? parseInt(value, 10) : name === "amount" ? parseFloat(value) : value;
+
     setFormData({
       ...formData,
-      [name]: value
+      [name]: updatedValue,
     });
   };
 
@@ -37,12 +40,16 @@ const AddTransactionForm = ({ onAddTransaction }) => {
     }
 
     const dataToSubmit = {
-      ...formData,
-      username: userName
+        ...formData,
+        amount: parseFloat(formData.amount),
+        transaction_date: new Date(formData.transaction_date).toISOString(),
+        username: userName,
     };
+    
+    console.log(dataToSubmit)
 
     try {
-      const response = await fetch("/api/transactions", {
+      const response = await fetch("http://localhost:8080/api/transactions", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${localStorage.getItem("token")}`,
@@ -60,7 +67,7 @@ const AddTransactionForm = ({ onAddTransaction }) => {
         onAddTransaction(result.transaction);
       }
       setFormData({
-        category: '',
+        category_id: '',
         description: '',
         amount: '',
         transaction_date: ''
@@ -70,18 +77,24 @@ const AddTransactionForm = ({ onAddTransaction }) => {
     }
   };
 
+  const handleBackgroundClick = (e) => {
+    if (e.target === e.currentTarget) {
+      onAddTransaction();
+    }
+  };
+
   return (
-    <div className="addTransFormBackground" onClick={onAddTransaction}>
+    <div className="addTransFormBackground" onClick={handleBackgroundClick}>
     <div className="addTransactionForm">
       <h2 className="formTitle">Add Transaction</h2>
       <form onSubmit={handleSubmit} className="AddTransFormDiv">
         <div className="formGroup">
-          <label htmlFor="category">Category:</label>
+          <label htmlFor="category_id">Category:</label>
           <input
-            type="text"
-            id="category"
-            name="category"
-            value={formData.category}
+            type="number"
+            id="category_id"
+            name="category_id"
+            value={formData.category_id}
             onChange={handleChange}
             required
           />
