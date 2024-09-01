@@ -3,6 +3,7 @@ package routes
 import (
 	"github.com/gorilla/mux"
 
+	"github.com/shaikhjunaidx/pennywise-backend/internal/budget"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
 	handlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/category"
 	transactionHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/transaction"
@@ -27,7 +28,10 @@ func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	userRepo := user.NewUserRepository(db)
 	categoryRepo := category.NewCategoryRepository(db)
 	transactionRepo := transaction.NewTransactionRepository(db)
-	transactionService := transaction.NewTransactionService(transactionRepo, userRepo, categoryRepo)
+	budgetRepo := budget.NewBudgetRepository(db)
+	budgetService := budget.NewBudgetService(budgetRepo)
+
+	transactionService := transaction.NewTransactionService(transactionRepo, userRepo, categoryRepo, budgetService)
 
 	transactionRouter := router.PathPrefix("/api/transactions").Subrouter()
 	transactionRouter.Use(middleware.JWTMiddleware)
