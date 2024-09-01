@@ -43,7 +43,7 @@ func getEnvironment() string {
 
 func getEnvFilePath(env string) string {
 	if env == "test" {
-		return fmt.Sprintf("../.env.%s", env)
+		return fmt.Sprintf("../../.env.%s", env)
 	}
 	return fmt.Sprintf(".env.%s", env)
 }
