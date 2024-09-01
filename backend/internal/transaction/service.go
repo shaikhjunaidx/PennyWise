@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/shaikhjunaidx/pennywise-backend/internal/budget"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/constants"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/user"
@@ -11,16 +12,19 @@ import (
 )
 
 type TransactionService struct {
-	Repo         TransactionRepository
-	UserRepo     user.UserRepository
-	CategoryRepo category.CategoryRepository
+	Repo          TransactionRepository
+	UserRepo      user.UserRepository
+	CategoryRepo  category.CategoryRepository
+	BudgetService *budget.BudgetService
 }
 
-func NewTransactionService(repo TransactionRepository, userRepo user.UserRepository, categoryRepo category.CategoryRepository) *TransactionService {
+func NewTransactionService(repo TransactionRepository, userRepo user.UserRepository,
+	categoryRepo category.CategoryRepository, budgetService *budget.BudgetService) *TransactionService {
 	return &TransactionService{
-		Repo:     repo,
-		UserRepo: userRepo,
-		CategoryRepo: categoryRepo,
+		Repo:          repo,
+		UserRepo:      userRepo,
+		CategoryRepo:  categoryRepo,
+		BudgetService: budgetService,
 	}
 }
 
@@ -52,6 +56,10 @@ func (s *TransactionService) AddTransaction(username string, categoryID uint,
 		return nil, err
 	}
 
+	if _, err := s.BudgetService.AddTransactionToBudget(user.ID, &categoryID, amount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+		return nil, err
+	}
+
 	return transaction, nil
 }
 
@@ -62,6 +70,9 @@ func (s *TransactionService) UpdateTransaction(id uint, amount float64, category
 		return nil, err
 	}
 
+	oldAmount := transaction.Amount
+	oldCategoryID := transaction.CategoryID
+
 	transaction.Amount = amount
 	transaction.CategoryID = categoryID
 	transaction.Description = description
@@ -71,12 +82,34 @@ func (s *TransactionService) UpdateTransaction(id uint, amount float64, category
 		return nil, err
 	}
 
+	if oldCategoryID != categoryID {
+		if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &oldCategoryID, -oldAmount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+			return nil, err
+		}
+		if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &categoryID, amount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+			return nil, err
+		}
+	} else {
+		if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &categoryID, amount-oldAmount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+			return nil, err
+		}
+	}
+
 	return transaction, nil
 }
 
 func (s *TransactionService) DeleteTransaction(transactionID uint) error {
 
+	transaction, err := s.Repo.FindByID(transactionID)
+	if err != nil {
+		return err
+	}
+
 	if err := s.Repo.DeleteByID(transactionID); err != nil {
+		return err
+	}
+
+	if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &transaction.CategoryID, -transaction.Amount, transaction.TransactionDate.Month().String(), transaction.TransactionDate.Year()); err != nil {
 		return err
 	}
 
