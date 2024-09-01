@@ -10,6 +10,10 @@ type UserService struct {
 	Repo UserRepository
 }
 
+func NewUserService(repo UserRepository) *UserService {
+	return &UserService{Repo: repo}
+}
+
 // In-memory map that stores active reset tokens
 var passwordResetTokens = make(map[string]*PasswordResetToken)
 
@@ -46,8 +50,8 @@ func (s *UserService) Login(username, password string) (string, error) {
 
 	token, err := GenerateJWTToken(username)
 	if err != nil {
-        return "", err
-    }
+		return "", err
+	}
 	return token, nil
 }
 
