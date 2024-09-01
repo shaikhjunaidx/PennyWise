@@ -27,9 +27,9 @@ func setupTestUserService(db *gorm.DB) *user.UserService {
 	return user.NewUserService(userRepo)
 }
 
-func setupTestCategoryService(db *gorm.DB) *category.CategoryService {
+func setupTestCategoryService(db *gorm.DB, userService *user.UserService) *category.CategoryService {
 	categoryRepo := category.NewCategoryRepository(db)
-	return category.NewCategoryService(categoryRepo)
+	return category.NewCategoryService(categoryRepo, userService)
 }
 
 // Helper function to create a test budget
@@ -57,12 +57,12 @@ func createTestBudget(t *testing.T, repo *budget.BudgetRepositoryImpl, user *mod
 func TestBudgetRepository_Create(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
 	userService := setupTestUserService(db)
-	categoryService := setupTestCategoryService(db)
+	categoryService := setupTestCategoryService(db, userService)
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
 	assert.NoError(t, err)
-	category, err := categoryService.AddCategory("Groceries", "Expenses for groceries")
+	category, err := categoryService.AddCategory(user.Username, "Groceries", "Expenses for groceries")
 	assert.NoError(t, err)
 
 	// Create a budget
@@ -84,12 +84,12 @@ func TestBudgetRepository_CreateOverallBudget(t *testing.T) {
 func TestBudgetRepository_FindByID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
 	userService := setupTestUserService(db)
-	categoryService := setupTestCategoryService(db)
+	categoryService := setupTestCategoryService(db, userService)
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
 	assert.NoError(t, err)
-	category, err := categoryService.AddCategory("Groceries", "Expenses for groceries")
+	category, err := categoryService.AddCategory(user.Username, "Groceries", "Expenses for groceries")
 	assert.NoError(t, err)
 
 	// Create and find a budget
@@ -119,14 +119,14 @@ func TestBudgetRepository_FindOverallBudget(t *testing.T) {
 func TestBudgetRepository_FindAllByUserID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
 	userService := setupTestUserService(db)
-	categoryService := setupTestCategoryService(db)
+	categoryService := setupTestCategoryService(db, userService)
 
-	// Create a user and a category
+	// Create a user and two categories
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
 	assert.NoError(t, err)
-	category1, err := categoryService.AddCategory("Groceries", "Expenses for groceries")
+	category1, err := categoryService.AddCategory(user.Username, "Groceries", "Expenses for groceries")
 	assert.NoError(t, err)
-	category2, err := categoryService.AddCategory("Utilities", "Expenses for utilities")
+	category2, err := categoryService.AddCategory(user.Username, "Utilities", "Expenses for utilities")
 	assert.NoError(t, err)
 
 	// Create multiple budgets
@@ -142,12 +142,12 @@ func TestBudgetRepository_FindAllByUserID(t *testing.T) {
 func TestBudgetRepository_Update(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
 	userService := setupTestUserService(db)
-	categoryService := setupTestCategoryService(db)
+	categoryService := setupTestCategoryService(db, userService)
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
 	assert.NoError(t, err)
-	category, err := categoryService.AddCategory("Groceries", "Expenses for groceries")
+	category, err := categoryService.AddCategory(user.Username, "Groceries", "Expenses for groceries")
 	assert.NoError(t, err)
 
 	// Create and update a budget
@@ -169,12 +169,12 @@ func TestBudgetRepository_Update(t *testing.T) {
 func TestBudgetRepository_DeleteByID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
 	userService := setupTestUserService(db)
-	categoryService := setupTestCategoryService(db)
+	categoryService := setupTestCategoryService(db, userService)
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
 	assert.NoError(t, err)
-	category, err := categoryService.AddCategory("Groceries", "Expenses for groceries")
+	category, err := categoryService.AddCategory(user.Username, "Groceries", "Expenses for groceries")
 	assert.NoError(t, err)
 
 	// Create and delete a budget
@@ -191,12 +191,12 @@ func TestBudgetRepository_DeleteByID(t *testing.T) {
 func TestBudgetRepository_FindByUserIDAndCategoryID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
 	userService := setupTestUserService(db)
-	categoryService := setupTestCategoryService(db)
+	categoryService := setupTestCategoryService(db, userService)
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
 	assert.NoError(t, err)
-	category, err := categoryService.AddCategory("Groceries", "Expenses for groceries")
+	category, err := categoryService.AddCategory(user.Username, "Groceries", "Expenses for groceries")
 	assert.NoError(t, err)
 
 	// Create and find a budget
