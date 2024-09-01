@@ -5,12 +5,29 @@ const SignUpForm = ({ closeForm }) => {
     const [password, setPassword] = useState("");
     const [email, setEmail] = useState("");
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
-        console.log("Username:", username);
-        console.log("Password:", password);
-        console.log("Email:", email);
-        closeForm();
+        try {
+            const response = await fetch("http://localhost:8080/api/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username, email, password }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                console.log("User created successfully: ", data);
+                closeForm();
+            } else {
+                console.log("Signup failed");
+                alert("Signup failed");
+            }
+        } catch (error) {
+            console.error("Error during Signup:", error);
+            alert("An error occurred during Signup. Please try again.");
+        }
     };
 
     return (
