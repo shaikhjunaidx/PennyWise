@@ -11,10 +11,10 @@ type MockUserRepository struct {
 }
 
 func (m *MockUserRepository) Create(user *models.User) error {
-	if _, exists := m.Users[user.Email]; exists {
-		return errors.New("email already exists")
+	if _, exists := m.Users[user.Username]; exists {
+		return errors.New("username already exists")
 	}
-	m.Users[user.Email] = user
+	m.Users[user.Username] = user
 	return nil
 }
 
@@ -29,27 +29,25 @@ func (m *MockUserRepository) FindByEmail(email string) (*models.User, error) {
 }
 
 func (m *MockUserRepository) FindByUsername(username string) (*models.User, error) {
-	for _, user := range m.Users {
-		if user.Username == username {
-			return user, nil
-		}
+	if user, exists := m.Users[username]; exists {
+		return user, nil
 	}
 
 	return nil, errors.New("user not found")
 }
 
 func (m *MockUserRepository) Update(user *models.User) error {
-	if _, exists := m.Users[user.Email]; !exists {
+	if _, exists := m.Users[user.Username]; !exists {
 		return errors.New("user not found")
 	}
-	m.Users[user.Email] = user
+	m.Users[user.Username] = user
 	return nil
 }
 
 func (m *MockUserRepository) Delete(user *models.User) error {
-	if _, exists := m.Users[user.Email]; !exists {
+	if _, exists := m.Users[user.Username]; !exists {
 		return errors.New("user not found")
 	}
-	delete(m.Users, user.Email)
+	delete(m.Users, user.Username)
 	return nil
 }

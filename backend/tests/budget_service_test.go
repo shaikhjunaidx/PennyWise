@@ -12,15 +12,28 @@ import (
 
 func setupBudgetService() (*budget.BudgetService, *mocks.MockBudgetRepository) {
 	mockRepo := new(mocks.MockBudgetRepository)
-	service := budget.NewBudgetService(mockRepo)
+	service := budget.NewBudgetService(mockRepo, setupUserService())
 	return service, mockRepo
+}
+
+func createBudgetTestUser(mockUserRepo *mocks.MockUserRepository, username string, id uint) *models.User {
+	user := &models.User{
+		ID:       id,
+		Username: username,
+		Email:    username + "@example.com",
+	}
+	mockUserRepo.Users[username] = user
+	return user
 }
 
 func TestBudgetService_CreateBudget(t *testing.T) {
 	service, mockRepo := setupBudgetService()
 
+	username := "john_doe"
+	user := createBudgetTestUser(service.UserService.Repo.(*mocks.MockUserRepository), username, 1)
+
 	budget := &models.Budget{
-		UserID:          1,
+		UserID:          user.ID,
 		CategoryID:      nil, // Assuming this is an overall budget
 		AmountLimit:     1000.0,
 		SpentAmount:     0,
@@ -29,12 +42,12 @@ func TestBudgetService_CreateBudget(t *testing.T) {
 		BudgetYear:      2024,
 	}
 
-	mockRepo.On("Create", budget).Return(nil)
+	mockRepo.On("Create", mock.Anything).Return(nil)
 
-	result, err := service.CreateBudget(budget.UserID, budget.CategoryID, budget.AmountLimit, budget.BudgetMonth, budget.BudgetYear)
+	result, err := service.CreateBudget(username, budget.CategoryID, budget.AmountLimit, budget.BudgetMonth, budget.BudgetYear)
 
 	assert.NoError(t, err)
-	assert.Equal(t, budget, result)
+	assert.Equal(t, user.ID, result.UserID)
 	assert.Equal(t, 1000.0, result.RemainingAmount)
 	assert.Equal(t, 0.0, result.SpentAmount)
 
@@ -73,7 +86,9 @@ func TestBudgetService_UpdateBudget(t *testing.T) {
 func TestBudgetService_AddTransactionToBudget(t *testing.T) {
 	service, mockRepo := setupBudgetService()
 
-	userID := uint(1)
+	username := "john_doe"
+	user := createBudgetTestUser(service.UserService.Repo.(*mocks.MockUserRepository), username, 1)
+
 	categoryID := uint(1)
 	transactionAmount := 200.0
 	month := "09"
@@ -81,7 +96,7 @@ func TestBudgetService_AddTransactionToBudget(t *testing.T) {
 
 	existingBudget := &models.Budget{
 		ID:              1,
-		UserID:          userID,
+		UserID:          user.ID,
 		CategoryID:      &categoryID,
 		AmountLimit:     1000.0,
 		SpentAmount:     300.0,
@@ -95,10 +110,10 @@ func TestBudgetService_AddTransactionToBudget(t *testing.T) {
 		RemainingAmount: 500.0,
 	}
 
-	mockRepo.On("FindByUserIDAndCategoryID", userID, &categoryID, month, year).Return(existingBudget, nil)
+	mockRepo.On("FindByUserIDAndCategoryID", user.ID, &categoryID, month, year).Return(existingBudget, nil)
 	mockRepo.On("Update", mock.Anything).Return(nil)
 
-	result, err := service.AddTransactionToBudget(userID, &categoryID, transactionAmount, month, year)
+	result, err := service.AddTransactionToBudget(user.ID, &categoryID, transactionAmount, month, year)
 
 	assert.NoError(t, err)
 	assert.Equal(t, expectedBudget.SpentAmount, result.SpentAmount)

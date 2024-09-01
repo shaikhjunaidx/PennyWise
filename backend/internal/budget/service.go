@@ -83,13 +83,9 @@ func (s *BudgetService) GetBudgetForUserAndCategory(username string, categoryID 
 	return s.Repo.FindByUserIDAndCategoryID(user.ID, categoryID, month, year)
 }
 
-func (s *BudgetService) AddTransactionToBudget(username string, categoryID *uint, transactionAmount float64, month string, year int) (*models.Budget, error) {
-	user, err := s.UserService.FindByUsername(username)
-	if err != nil {
-		return nil, err
-	}
+func (s *BudgetService) AddTransactionToBudget(userID uint, categoryID *uint, transactionAmount float64, month string, year int) (*models.Budget, error) {
 
-	budget, err := s.Repo.FindByUserIDAndCategoryID(user.ID, categoryID, month, year)
+	budget, err := s.Repo.FindByUserIDAndCategoryID(userID, categoryID, month, year)
 	if err != nil {
 		return nil, err
 	}

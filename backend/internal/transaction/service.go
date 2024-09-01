@@ -56,7 +56,7 @@ func (s *TransactionService) AddTransaction(username string, categoryID uint,
 		return nil, err
 	}
 
-	if _, err := s.BudgetService.AddTransactionToBudget(username, &categoryID, amount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+	if _, err := s.BudgetService.AddTransactionToBudget(user.ID, &categoryID, amount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
 		return nil, err
 	}
 
@@ -83,14 +83,14 @@ func (s *TransactionService) UpdateTransaction(id uint, amount float64, category
 	}
 
 	if oldCategoryID != categoryID {
-		if _, err := s.BudgetService.AddTransactionToBudget(transaction.User.Username, &oldCategoryID, -oldAmount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+		if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &oldCategoryID, -oldAmount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
 			return nil, err
 		}
-		if _, err := s.BudgetService.AddTransactionToBudget(transaction.User.Username, &categoryID, amount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+		if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &categoryID, amount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
 			return nil, err
 		}
 	} else {
-		if _, err := s.BudgetService.AddTransactionToBudget(transaction.User.Username, &categoryID, amount-oldAmount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
+		if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &categoryID, amount-oldAmount, transactionDate.Month().String(), transactionDate.Year()); err != nil {
 			return nil, err
 		}
 	}
@@ -109,7 +109,7 @@ func (s *TransactionService) DeleteTransaction(transactionID uint) error {
 		return err
 	}
 
-	if _, err := s.BudgetService.AddTransactionToBudget(transaction.User.Username, &transaction.CategoryID, -transaction.Amount, transaction.TransactionDate.Month().String(), transaction.TransactionDate.Year()); err != nil {
+	if _, err := s.BudgetService.AddTransactionToBudget(transaction.UserID, &transaction.CategoryID, -transaction.Amount, transaction.TransactionDate.Month().String(), transaction.TransactionDate.Year()); err != nil {
 		return err
 	}
 
@@ -127,3 +127,6 @@ func (s *TransactionService) GetTransactionByID(id uint) (*models.Transaction, e
 	}
 	return transaction, nil
 }
+
+// Add Get transactions by category ID and User ID
+
