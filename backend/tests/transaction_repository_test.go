@@ -31,8 +31,9 @@ func createUser(t *testing.T, db *gorm.DB) *models.User {
 	return user
 }
 
-func createCategory(t *testing.T, db *gorm.DB) *models.Category {
+func createCategory(t *testing.T, db *gorm.DB, userID uint) *models.Category {
 	category := &models.Category{
+		UserID:      userID,
 		Name:        "Groceries",
 		Description: "Expenses for groceries",
 	}
@@ -57,7 +58,7 @@ func createTransaction(t *testing.T, repo *transaction.TransactionRepositoryImpl
 func TestTransactionRepository_Create(t *testing.T) {
 	repo, db := setupTransactionTestRepo(t)
 	user := createUser(t, db)
-	category := createCategory(t, db)
+	category := createCategory(t, db, user.ID)
 	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
 	assert.NotZero(t, transaction.ID)
@@ -66,7 +67,7 @@ func TestTransactionRepository_Create(t *testing.T) {
 func TestTransactionRepository_FindByID(t *testing.T) {
 	repo, db := setupTransactionTestRepo(t)
 	user := createUser(t, db)
-	category := createCategory(t, db)
+	category := createCategory(t, db, user.ID)
 	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
 	foundTransaction, err := repo.FindByID(transaction.ID)
@@ -78,7 +79,7 @@ func TestTransactionRepository_FindByID(t *testing.T) {
 func TestTransactionRepository_Update(t *testing.T) {
 	repo, db := setupTransactionTestRepo(t)
 	user := createUser(t, db)
-	category := createCategory(t, db)
+	category := createCategory(t, db, user.ID)
 	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
 	// Update the transaction
@@ -96,7 +97,7 @@ func TestTransactionRepository_Update(t *testing.T) {
 func TestTransactionRepository_DeleteByID(t *testing.T) {
 	repo, db := setupTransactionTestRepo(t)
 	user := createUser(t, db)
-	category := createCategory(t, db)
+	category := createCategory(t, db, user.ID)
 	transaction := createTransaction(t, repo, user.ID, category.ID, 100.0, "Groceries")
 
 	err := repo.DeleteByID(transaction.ID)
@@ -110,7 +111,7 @@ func TestTransactionRepository_DeleteByID(t *testing.T) {
 func TestTransactionRepository_FindAllByUsername(t *testing.T) {
 	repo, db := setupTransactionTestRepo(t)
 	user := createUser(t, db)
-	category := createCategory(t, db)
+	category := createCategory(t, db, user.ID)
 
 	createTransaction(t, repo, user.ID, category.ID, 50.0, "Dinner")
 	createTransaction(t, repo, user.ID, category.ID, 150.0, "Utilities")
