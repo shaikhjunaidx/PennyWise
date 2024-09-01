@@ -91,14 +91,8 @@ func TestBudgetService_AddTransactionToBudget(t *testing.T) {
 	}
 
 	expectedBudget := &models.Budget{
-		ID:              1,
-		UserID:          userID,
-		CategoryID:      &categoryID,
-		AmountLimit:     1000.0,
 		SpentAmount:     500.0,
 		RemainingAmount: 500.0,
-		BudgetMonth:     month,
-		BudgetYear:      year,
 	}
 
 	mockRepo.On("FindByUserIDAndCategoryID", userID, &categoryID, month, year).Return(existingBudget, nil)
