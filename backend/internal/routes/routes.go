@@ -5,7 +5,8 @@ import (
 
 	"github.com/shaikhjunaidx/pennywise-backend/internal/budget"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
-	handlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/category"
+	budgetHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/budget"
+	categoryHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/category"
 	transactionHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/transaction"
 	userHandlers "github.com/shaikhjunaidx/pennywise-backend/internal/handlers/user"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/middleware"
@@ -29,7 +30,8 @@ func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	categoryRepo := category.NewCategoryRepository(db)
 	transactionRepo := transaction.NewTransactionRepository(db)
 	budgetRepo := budget.NewBudgetRepository(db)
-	budgetService := budget.NewBudgetService(budgetRepo)
+	userService := user.NewUserService(userRepo)
+	budgetService := budget.NewBudgetService(budgetRepo, userService)
 
 	transactionService := transaction.NewTransactionService(transactionRepo, userRepo, categoryRepo, budgetService)
 
@@ -49,9 +51,27 @@ func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
 
 	categoryRouter := router.PathPrefix("/api/categories").Subrouter()
 
-	categoryRouter.HandleFunc("", handlers.CreateCategoryHandler(categoryService)).Methods("POST")
-	categoryRouter.HandleFunc("/{id:[0-9]+}", handlers.GetCategoryByIDHandler(categoryService)).Methods("GET")
-	categoryRouter.HandleFunc("", handlers.GetAllCategoriesHandler(categoryService)).Methods("GET")
-	categoryRouter.HandleFunc("/{id:[0-9]+}", handlers.UpdateCategoryHandler(categoryService)).Methods("PUT")
-	categoryRouter.HandleFunc("/{id:[0-9]+}", handlers.DeleteCategoryHandler(categoryService)).Methods("DELETE")
+	categoryRouter.HandleFunc("", categoryHandlers.CreateCategoryHandler(categoryService)).Methods("POST")
+	categoryRouter.HandleFunc("/{id:[0-9]+}", categoryHandlers.GetCategoryByIDHandler(categoryService)).Methods("GET")
+	categoryRouter.HandleFunc("", categoryHandlers.GetAllCategoriesHandler(categoryService)).Methods("GET")
+	categoryRouter.HandleFunc("/{id:[0-9]+}", categoryHandlers.UpdateCategoryHandler(categoryService)).Methods("PUT")
+	categoryRouter.HandleFunc("/{id:[0-9]+}", categoryHandlers.DeleteCategoryHandler(categoryService)).Methods("DELETE")
+}
+
+func SetupBudgetRoutes(router *mux.Router, db *gorm.DB) {
+	userRepo := user.NewUserRepository(db)
+	userService := user.NewUserService(userRepo)
+
+	budgetRepo := budget.NewBudgetRepository(db)
+	budgetService := budget.NewBudgetService(budgetRepo, userService)
+
+	budgetRouter := router.PathPrefix("/api/budgets").Subrouter()
+	budgetRouter.Use(middleware.JWTMiddleware)
+
+	budgetRouter.HandleFunc("", budgetHandlers.CreateBudgetHandler(budgetService)).Methods("POST")
+	budgetRouter.HandleFunc("/{id:[0-9]+}", budgetHandlers.GetBudgetByIDHandler(budgetService)).Methods("GET")
+	budgetRouter.HandleFunc("", budgetHandlers.GetBudgetsForUserHandler(budgetService)).Methods("GET")
+	budgetRouter.HandleFunc("/{id:[0-9]+}", budgetHandlers.UpdateBudgetHandler(budgetService)).Methods("PUT")
+	budgetRouter.HandleFunc("/{id:[0-9]+}", budgetHandlers.DeleteBudgetHandler(budgetService)).Methods("DELETE")
+	budgetRouter.HandleFunc("/overall", budgetHandlers.GetOverallBudgetHandler(budgetService)).Methods("GET")
 }

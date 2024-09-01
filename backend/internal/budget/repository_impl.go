@@ -1,6 +1,9 @@
 package budget
 
 import (
+	"fmt"
+	"time"
+
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 	"gorm.io/gorm"
 )
@@ -43,7 +46,11 @@ func (r *BudgetRepositoryImpl) FindAllByUserID(userID uint) ([]*models.Budget, e
 
 func (r *BudgetRepositoryImpl) FindByUserIDAndCategoryID(userID uint, categoryID *uint, month string, year int) (*models.Budget, error) {
 	var budget models.Budget
-	query := r.DB.Where("user_id = ? AND budget_month = ? AND budget_year = ?", userID, month, year)
+
+	monthFormatted := fmt.Sprintf("%02d", time.Now().Month())
+
+	query := r.DB.Where("user_id = ? AND budget_month = ? AND budget_year = ?", userID, monthFormatted, year)
+
 	if categoryID != nil {
 		query = query.Where("category_id = ?", *categoryID)
 	} else {

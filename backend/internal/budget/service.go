@@ -1,20 +1,30 @@
 package budget
 
 import (
+	"github.com/shaikhjunaidx/pennywise-backend/internal/user"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
 
 type BudgetService struct {
-	Repo BudgetRepository
+	Repo        BudgetRepository
+	UserService *user.UserService
 }
 
-func NewBudgetService(repo BudgetRepository) *BudgetService {
-	return &BudgetService{Repo: repo}
+func NewBudgetService(repo BudgetRepository, userService *user.UserService) *BudgetService {
+	return &BudgetService{
+		Repo:        repo,
+		UserService: userService}
 }
 
-func (s *BudgetService) CreateBudget(userID uint, categoryID *uint, amountLimit float64, month string, year int) (*models.Budget, error) {
+func (s *BudgetService) CreateBudget(username string, categoryID *uint, amountLimit float64, month string, year int) (*models.Budget, error) {
+
+	user, err := s.UserService.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
 	budget := &models.Budget{
-		UserID:      userID,
+		UserID:      user.ID,
 		CategoryID:  categoryID,
 		AmountLimit: amountLimit,
 		BudgetMonth: month,
@@ -55,16 +65,31 @@ func (s *BudgetService) GetBudgetByID(budgetID uint) (*models.Budget, error) {
 	return s.Repo.FindByID(budgetID)
 }
 
-func (s *BudgetService) GetBudgetsForUser(userID uint) ([]*models.Budget, error) {
-	return s.Repo.FindAllByUserID(userID)
+func (s *BudgetService) GetBudgetsForUser(username string) ([]*models.Budget, error) {
+	user, err := s.UserService.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.Repo.FindAllByUserID(user.ID)
 }
 
-func (s *BudgetService) GetBudgetForUserAndCategory(userID uint, categoryID *uint, month string, year int) (*models.Budget, error) {
-	return s.Repo.FindByUserIDAndCategoryID(userID, categoryID, month, year)
+func (s *BudgetService) GetBudgetForUserAndCategory(username string, categoryID *uint, month string, year int) (*models.Budget, error) {
+	user, err := s.UserService.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	return s.Repo.FindByUserIDAndCategoryID(user.ID, categoryID, month, year)
 }
 
-func (s *BudgetService) AddTransactionToBudget(userID uint, categoryID *uint, transactionAmount float64, month string, year int) (*models.Budget, error) {
-	budget, err := s.Repo.FindByUserIDAndCategoryID(userID, categoryID, month, year)
+func (s *BudgetService) AddTransactionToBudget(username string, categoryID *uint, transactionAmount float64, month string, year int) (*models.Budget, error) {
+	user, err := s.UserService.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	budget, err := s.Repo.FindByUserIDAndCategoryID(user.ID, categoryID, month, year)
 	if err != nil {
 		return nil, err
 	}
@@ -77,4 +102,33 @@ func (s *BudgetService) AddTransactionToBudget(userID uint, categoryID *uint, tr
 	}
 
 	return budget, nil
+}
+
+func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget, error) {
+	user, err := s.UserService.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	budgets, err := s.Repo.FindAllByUserID(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	overallBudget := &models.Budget{
+		UserID:          user.ID,
+		AmountLimit:     0,
+		SpentAmount:     0,
+		RemainingAmount: 0,
+		BudgetMonth:     "",
+		BudgetYear:      0,
+	}
+
+	for _, budget := range budgets {
+		overallBudget.AmountLimit += budget.AmountLimit
+		overallBudget.SpentAmount += budget.SpentAmount
+		overallBudget.RemainingAmount += budget.RemainingAmount
+	}
+
+	return overallBudget, nil
 }

@@ -99,3 +99,11 @@ func (s *UserService) ResetPassword(token, newPassword string) error {
 
 	return nil
 }
+
+func (s *UserService) FindByUsername(username string) (*models.User, error) {
+	user, err := s.Repo.FindByUsername(username)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
+	return user, nil
+}
