@@ -8,8 +8,10 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/category"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/handlers"
+	"github.com/shaikhjunaidx/pennywise-backend/internal/middleware"
 )
 
+// CategoryRequest struct is used for decoding JSON requests
 type CategoryRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
@@ -28,17 +30,19 @@ type CategoryRequest struct {
 // @Router /api/categories [post]
 func CreateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var req struct {
-			Name        string `json:"name"`
-			Description string `json:"description"`
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
 		}
 
+		var req CategoryRequest
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			handlers.SendErrorResponse(w, "Invalid request payload", http.StatusBadRequest)
 			return
 		}
 
-		category, err := service.AddCategory(req.Name, req.Description)
+		category, err := service.AddCategory(username, req.Name, req.Description)
 		if err != nil {
 			handlers.SendErrorResponse(w, "Failed to create category", http.StatusInternalServerError)
 			return
@@ -61,6 +65,12 @@ func CreateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 // @Router /api/categories/{id} [get]
 func GetCategoryByIDHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
 		vars := mux.Vars(r)
 		idStr := vars["id"]
 		id, err := strconv.ParseUint(idStr, 10, 32)
@@ -69,7 +79,7 @@ func GetCategoryByIDHandler(service *category.CategoryService) http.HandlerFunc 
 			return
 		}
 
-		category, err := service.GetCategoryByID(uint(id))
+		category, err := service.GetCategoryByID(username, uint(id))
 		if err != nil {
 			handlers.SendErrorResponse(w, "Category not found", http.StatusNotFound)
 			return
@@ -79,9 +89,9 @@ func GetCategoryByIDHandler(service *category.CategoryService) http.HandlerFunc 
 	}
 }
 
-// GetAllCategoriesHandler handles retrieving all categories.
+// GetAllCategoriesHandler handles retrieving all categories for the user.
 // @Summary Get All Categories
-// @Description Retrieves all categories.
+// @Description Retrieves all categories for the authenticated user.
 // @Tags categories
 // @Produce  json
 // @Success 200 {array} models.Category "List of Categories"
@@ -89,7 +99,13 @@ func GetCategoryByIDHandler(service *category.CategoryService) http.HandlerFunc 
 // @Router /api/categories [get]
 func GetAllCategoriesHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		categories, err := service.GetAllCategories()
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		categories, err := service.GetAllCategories(username)
 		if err != nil {
 			handlers.SendErrorResponse(w, "Failed to retrieve categories", http.StatusInternalServerError)
 			return
@@ -114,6 +130,12 @@ func GetAllCategoriesHandler(service *category.CategoryService) http.HandlerFunc
 // @Router /api/categories/{id} [put]
 func UpdateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
 		vars := mux.Vars(r)
 		idStr := vars["id"]
 		id, err := strconv.ParseUint(idStr, 10, 32)
@@ -129,7 +151,7 @@ func UpdateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 			return
 		}
 
-		category, err := service.UpdateCategory(uint(id), req.Name, req.Description)
+		category, err := service.UpdateCategory(username, uint(id), req.Name, req.Description)
 		if err != nil {
 			handlers.SendErrorResponse(w, "Category not found", http.StatusNotFound)
 			return
@@ -152,6 +174,12 @@ func UpdateCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 // @Router /api/categories/{id} [delete]
 func DeleteCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
 		vars := mux.Vars(r)
 		idStr := vars["id"]
 		id, err := strconv.ParseUint(idStr, 10, 32)
@@ -160,7 +188,7 @@ func DeleteCategoryHandler(service *category.CategoryService) http.HandlerFunc {
 			return
 		}
 
-		if err := service.DeleteCategory(uint(id)); err != nil {
+		if err := service.DeleteCategory(username, uint(id)); err != nil {
 			handlers.SendErrorResponse(w, "Category not found", http.StatusNotFound)
 			return
 		}

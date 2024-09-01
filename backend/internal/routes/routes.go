@@ -46,8 +46,11 @@ func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 }
 
 func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
+	userRepo := user.NewUserRepository(db)
+	userService := user.NewUserService(userRepo)
+
 	categoryRepo := category.NewCategoryRepository(db)
-	categoryService := category.NewCategoryService(categoryRepo)
+	categoryService := category.NewCategoryService(categoryRepo, userService)
 
 	categoryRouter := router.PathPrefix("/api/categories").Subrouter()
 
