@@ -16,7 +16,7 @@ import (
 )
 
 func setupUserService() *user.UserService {
-	if err := godotenv.Load("../.env.test"); err != nil {
+	if err := godotenv.Load("../../.env.test"); err != nil {
 		log.Fatalf("Error loading .env.test file")
 	}
 
