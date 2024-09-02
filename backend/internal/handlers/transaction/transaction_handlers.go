@@ -201,3 +201,30 @@ func DeleteTransactionHandler(service *transaction.TransactionService) http.Hand
 		w.WriteHeader(http.StatusNoContent)
 	}
 }
+
+func GetTransactionsByCategoryHandler(service *transaction.TransactionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username  not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		vars := mux.Vars(r)
+		categoryIDStr := vars["category_id"]
+		categoryID, err := strconv.ParseUint(categoryIDStr, 10, 32)
+		if err != nil || categoryID == 0 {
+			handlers.SendErrorResponse(w, "Invalid Category ID", http.StatusBadRequest)
+			return
+		}
+
+		transactions, err := service.GetTransactionsByCategoryID(username, uint(categoryID))
+		if err != nil {
+			handlers.SendErrorResponse(w, "Failed to retrieve transactions", http.StatusInternalServerError)
+			return
+		}
+
+		handlers.SendJSONResponse(w, transactions, http.StatusOK)
+	}
+}

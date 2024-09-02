@@ -172,3 +172,68 @@ func TestTransactionService_GetTransactionByID_NotFound(t *testing.T) {
 
 	mockRepo.AssertExpectations(t)
 }
+
+func TestTransactionService_FindAllByUserIDAndCategoryID(t *testing.T) {
+	service, mockRepo, mockUserRepo, mockCategoryRepo, _ := setUpTransactionService()
+
+	// Create a test user
+	username := "john_doe"
+	user := createTestUser(mockUserRepo, username, 1)
+
+	// Create test categories
+	category1 := &models.Category{
+		ID:          1,
+		UserID:      user.ID,
+		Name:        "Groceries",
+		Description: "Expenses for groceries",
+	}
+	category2 := &models.Category{
+		ID:          2,
+		UserID:      user.ID,
+		Name:        "Utilities",
+		Description: "Expenses for utilities",
+	}
+	mockCategoryRepo.On("FindByID", category1.ID).Return(category1, nil)
+	mockCategoryRepo.On("FindByID", category2.ID).Return(category2, nil)
+
+	// Create transactions using helper
+	transactionsForCategory1 := []*models.Transaction{
+		createTestTransaction(user.ID, category1.ID, 50.0, "Groceries Shopping"),
+		createTestTransaction(user.ID, category1.ID, 100.0, "Weekly Groceries"),
+	}
+	transactionsForCategory2 := []*models.Transaction{
+		createTestTransaction(user.ID, category2.ID, 150.0, "Electricity Bill"),
+		createTestTransaction(user.ID, category2.ID, 75.0, "Water Bill"),
+	}
+
+	// Mock repository behavior
+	mockRepo.On("FindAllByUserIDAndCategoryID", user.ID, category1.ID).Return(transactionsForCategory1, nil)
+	mockRepo.On("FindAllByUserIDAndCategoryID", user.ID, category2.ID).Return(transactionsForCategory2, nil)
+
+	// Test transactions for the first category
+	result, err := service.GetTransactionsByCategoryID(username, category1.ID)
+	assert.NoError(t, err)
+	assert.Len(t, result, 2)
+	for _, transaction := range result {
+		assert.Equal(t, category1.ID, transaction.CategoryID)
+		assert.Contains(t, []float64{50.0, 100.0}, transaction.Amount)
+		assert.Contains(t, []string{"Groceries Shopping", "Weekly Groceries"}, transaction.Description)
+	}
+
+	// Test transactions for the second category
+	result, err = service.GetTransactionsByCategoryID(username, category2.ID)
+	assert.NoError(t, err)
+	assert.Len(t, result, 2)
+	for _, transaction := range result {
+		assert.Equal(t, category2.ID, transaction.CategoryID)
+		assert.Contains(t, []float64{150.0, 75.0}, transaction.Amount)
+		assert.Contains(t, []string{"Electricity Bill", "Water Bill"}, transaction.Description)
+	}
+
+	// Test for a non-existent category
+	nonExistentCategoryID := uint(999)
+	mockRepo.On("FindAllByUserIDAndCategoryID", user.ID, nonExistentCategoryID).Return([]*models.Transaction{}, nil)
+	result, err = service.GetTransactionsByCategoryID(username, nonExistentCategoryID)
+	assert.NoError(t, err)
+	assert.Len(t, result, 0)
+}
