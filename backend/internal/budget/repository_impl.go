@@ -48,20 +48,23 @@ func (r *BudgetRepositoryImpl) FindAllByUserID(userID uint) ([]*models.Budget, e
 func (r *BudgetRepositoryImpl) FindByUserIDAndCategoryID(userID uint, categoryID *uint, month string, year int) (*models.Budget, error) {
 	var budget models.Budget
 
-	monthFormatted := fmt.Sprintf("%02d", time.Now().Month())
+	parsedTime, err := time.Parse("January", month)
+	if err != nil {
+		return nil, errors.New("invalid month format")
+	}
+
+	monthFormatted := fmt.Sprintf("%02d", parsedTime.Month())
 
 	query := r.DB.Where("user_id = ? AND budget_month = ? AND budget_year = ?", userID, monthFormatted, year)
 
 	if categoryID != nil {
 		query = query.Where("category_id = ?", *categoryID)
 	} else {
-		return nil, errors.New("category_id cannot be nil")
+		query = query.Where("category_id IS NULL")
 	}
-
 	if err := query.First(&budget).Error; err != nil {
 		return nil, err
 	}
-
 	return &budget, nil
 }
 
