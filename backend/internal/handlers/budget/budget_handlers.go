@@ -12,13 +12,20 @@ import (
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
 
+type BudgetRequest struct {
+	CategoryID  *uint   `json:"category_id,omitempty"`
+	AmountLimit float64 `json:"amount_limit"`
+	BudgetMonth string  `json:"budget_month"`
+	BudgetYear  int     `json:"budget_year"`
+}
+
 // CreateBudgetHandler handles the creation of a new budget.
 // @Summary Create Budget
 // @Description Creates a new budget for a user, either overall or for a specific category.
 // @Tags budgets
 // @Accept  json
 // @Produce  json
-// @Param   budget  body  models.Budget  true  "Budget Data"
+// @Param   budget  body  handlers.BudgetRequest  true  "Budget Data"
 // @Success 201 {object} models.Budget "Created Budget"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
@@ -103,14 +110,18 @@ func GetBudgetsForUserHandler(service *budget.BudgetService) http.HandlerFunc {
 	}
 }
 
+type UpdateBudgetRequest struct {
+	AmountLimit float64 `json:"amount_limit,omitempty"`
+}
+
 // UpdateBudgetHandler handles updating an existing budget.
 // @Summary Update Budget
 // @Description Updates an existing budget by ID.
 // @Tags budgets
 // @Accept  json
 // @Produce  json
-// @Param   id      path  int            true  "Budget ID"
-// @Param   budget  body  models.Budget  true  "Updated Budget Data"
+// @Param   id      path  int                    true  "Budget ID"
+// @Param   budget  body  handlers.UpdateBudgetRequest  true  "Updated Budget Data"
 // @Success 200 {object} models.Budget "Updated Budget"
 // @Failure 400 {object} map[string]interface{} "Invalid request payload"
 // @Failure 404 {object} map[string]interface{} "Budget not found"

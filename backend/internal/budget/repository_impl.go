@@ -1,6 +1,7 @@
 package budget
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -54,11 +55,13 @@ func (r *BudgetRepositoryImpl) FindByUserIDAndCategoryID(userID uint, categoryID
 	if categoryID != nil {
 		query = query.Where("category_id = ?", *categoryID)
 	} else {
-		query = query.Where("category_id IS NULL")
+		return nil, errors.New("category_id cannot be nil")
 	}
+
 	if err := query.First(&budget).Error; err != nil {
 		return nil, err
 	}
+
 	return &budget, nil
 }
 
