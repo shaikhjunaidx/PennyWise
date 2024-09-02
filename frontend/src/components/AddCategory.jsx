@@ -11,7 +11,6 @@ const AddBudgetForm = ({ onAddBudget}) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const formRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -59,7 +58,7 @@ const AddBudgetForm = ({ onAddBudget}) => {
         body: JSON.stringify({
           amount_limit: parseFloat(formData.amount),
           budget_year: parseInt(formData.budget_year),
-          budget_month: parseInt(formData.budget_month),
+          budget_month: formData.budget_month,
           category_id: category_id,
         }),
       });
@@ -89,6 +88,12 @@ const AddBudgetForm = ({ onAddBudget}) => {
       setError(error.message);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleClickOutside = (event) => {
+    if (formRef.current && !formRef.current.contains(event.target)) {
+      onClose();
     }
   };
 
@@ -149,16 +154,29 @@ const AddBudgetForm = ({ onAddBudget}) => {
           />
         </div>
         <div className="formGroup">
-          <label htmlFor="budget_month">Budget Month:</label>
-          <input
-            type="number"
-            id="budget_month"
-            name="budget_month"
-            value={formData.budget_month}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <label htmlFor="budget_month">Budget Month:</label>
+            <select
+              id="budget_month"
+              name="budget_month"
+              value={formData.budget_month}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Month</option>
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
         <button type="submit" className="submitButton" disabled={loading}>
           {loading ? "Submitting..." : "Add Budget"}
         </button>
