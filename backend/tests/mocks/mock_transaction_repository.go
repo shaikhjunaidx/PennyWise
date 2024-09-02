@@ -33,3 +33,8 @@ func (m *MockTransactionRepository) FindAllByUsername(username string) ([]*model
 	args := m.Called(username)
 	return args.Get(0).([]*models.Transaction), args.Error(1)
 }
+
+func (m *MockTransactionRepository) FindAllByUserIDAndCategoryID(userID, categoryID uint) ([]*models.Transaction, error) {
+	args := m.Called(userID, categoryID)
+	return args.Get(0).([]*models.Transaction), args.Error(1)
+}

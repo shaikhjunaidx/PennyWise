@@ -8,4 +8,5 @@ type TransactionRepository interface {
 	DeleteByID(id uint) error
 	FindByID(id uint) (*models.Transaction, error)
 	FindAllByUsername(username string) ([]*models.Transaction, error)
+	FindAllByUserIDAndCategoryID(userID uint, categoryID uint) ([]*models.Transaction, error)
 }

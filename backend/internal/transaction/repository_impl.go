@@ -67,3 +67,12 @@ func (r *TransactionRepositoryImpl) FindAllByUsername(username string) ([]*model
 
 	return transactions, nil
 }
+
+func (r *TransactionRepositoryImpl) FindAllByUserIDAndCategoryID(userID, categoryID uint) ([]*models.Transaction, error) {
+	var transactions []*models.Transaction
+	err := r.DB.Where("user_id = ? AND category_id = ?", userID, categoryID).Find(&transactions).Error
+	if err != nil {
+		return nil, err
+	}
+	return transactions, nil
+}

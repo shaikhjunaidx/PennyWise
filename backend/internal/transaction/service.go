@@ -128,5 +128,17 @@ func (s *TransactionService) GetTransactionByID(id uint) (*models.Transaction, e
 	return transaction, nil
 }
 
-// Add Get transactions by category ID and User ID
+func (s *TransactionService) GetTransactionsByCategoryID(username string, categoryID uint) ([]*models.Transaction, error) {
+	user, err := s.UserRepo.FindByUsername(username)
+	if err != nil {
+		return nil, errors.New("user not found")
+	}
 
+	transactions, err := s.Repo.FindAllByUserIDAndCategoryID(user.ID, categoryID)
+	if err != nil {
+		return nil, err
+	}
+
+	return transactions, nil
+
+}

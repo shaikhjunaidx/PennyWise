@@ -43,6 +43,8 @@ func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	transactionRouter.HandleFunc("/{id:[0-9]+}", transactionHandlers.DeleteTransactionHandler(transactionService)).Methods("DELETE")
 	transactionRouter.HandleFunc("/{id:[0-9]+}", transactionHandlers.GetTransactionByIDHandler(transactionService)).Methods("GET")
 	transactionRouter.HandleFunc("", transactionHandlers.GetTransactionsHandler(transactionService)).Methods("GET")
+
+	transactionRouter.HandleFunc("/category/{category_id:[0-9]+}", transactionHandlers.GetTransactionsByCategoryHandler(transactionService)).Methods("GET")
 }
 
 func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
