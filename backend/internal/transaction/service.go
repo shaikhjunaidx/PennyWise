@@ -116,7 +116,7 @@ func (s *TransactionService) DeleteTransaction(transactionID uint) error {
 	return nil
 }
 
-func (s *TransactionService) GetTransactionsForUser(username string) ([]*models.Transaction, error) {
+func (s *TransactionService) GetTransactionsForUser(username string) ([]*TransactionResponse, error) {
 	return s.Repo.FindAllByUsername(username)
 }
 
@@ -128,7 +128,7 @@ func (s *TransactionService) GetTransactionByID(id uint) (*models.Transaction, e
 	return transaction, nil
 }
 
-func (s *TransactionService) GetTransactionsByCategoryID(username string, categoryID uint) ([]*models.Transaction, error) {
+func (s *TransactionService) GetTransactionsByCategoryID(username string, categoryID uint) ([]*TransactionResponse, error) {
 	user, err := s.UserRepo.FindByUsername(username)
 	if err != nil {
 		return nil, errors.New("user not found")

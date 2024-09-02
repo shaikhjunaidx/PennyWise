@@ -7,6 +7,6 @@ type TransactionRepository interface {
 	Update(transaction *models.Transaction) error
 	DeleteByID(id uint) error
 	FindByID(id uint) (*models.Transaction, error)
-	FindAllByUsername(username string) ([]*models.Transaction, error)
-	FindAllByUserIDAndCategoryID(userID uint, categoryID uint) ([]*models.Transaction, error)
+	FindAllByUsername(username string) ([]*TransactionResponse, error)
+	FindAllByUserIDAndCategoryID(userID uint, categoryID uint) ([]*TransactionResponse, error)
 }

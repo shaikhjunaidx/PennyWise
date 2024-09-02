@@ -1,6 +1,7 @@
 package mocks
 
 import (
+	"github.com/shaikhjunaidx/pennywise-backend/internal/transaction"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 	"github.com/stretchr/testify/mock"
 )
@@ -29,12 +30,12 @@ func (m *MockTransactionRepository) FindByID(id uint) (*models.Transaction, erro
 	return args.Get(0).(*models.Transaction), args.Error(1)
 }
 
-func (m *MockTransactionRepository) FindAllByUsername(username string) ([]*models.Transaction, error) {
+func (m *MockTransactionRepository) FindAllByUsername(username string) ([]*transaction.TransactionResponse, error) {
 	args := m.Called(username)
-	return args.Get(0).([]*models.Transaction), args.Error(1)
+	return args.Get(0).([]*transaction.TransactionResponse), args.Error(1)
 }
 
-func (m *MockTransactionRepository) FindAllByUserIDAndCategoryID(userID, categoryID uint) ([]*models.Transaction, error) {
+func (m *MockTransactionRepository) FindAllByUserIDAndCategoryID(userID, categoryID uint) ([]*transaction.TransactionResponse, error) {
 	args := m.Called(userID, categoryID)
-	return args.Get(0).([]*models.Transaction), args.Error(1)
+	return args.Get(0).([]*transaction.TransactionResponse), args.Error(1)
 }

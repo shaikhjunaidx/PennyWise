@@ -42,10 +42,6 @@ func (s *UserService) SignUp(username, email, password string) (*models.User, er
 		return nil, err
 	}
 
-	// category, _ := s.CategoryService.AddCategory(username, constants.DefaultCategoryName, "Default category for uncategorized transactions")
-
-	// s.BudgetService.CreateBudget(username, &category.ID, 0.0, time.Now().Month().String(), time.Now().Year())
-
 	if err := s.addDefaultCategoryAndBudget(user); err != nil {
 		return nil, err
 	}
