@@ -2,16 +2,24 @@ package user
 
 import (
 	"errors"
+	"time"
 
+	"github.com/shaikhjunaidx/pennywise-backend/internal/constants"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
 
 type UserService struct {
-	Repo UserRepository
+	Repo            UserRepository
+	CategoryService UserSignUpCategoryService
+	BudgetService   UserSignUpBudgetService
 }
 
-func NewUserService(repo UserRepository) *UserService {
-	return &UserService{Repo: repo}
+func NewUserService(repo UserRepository, categoryService UserSignUpCategoryService, budgetService UserSignUpBudgetService) *UserService {
+	return &UserService{
+		Repo:            repo,
+		CategoryService: categoryService,
+		BudgetService:   budgetService,
+	}
 }
 
 // In-memory map that stores active reset tokens
@@ -34,7 +42,32 @@ func (s *UserService) SignUp(username, email, password string) (*models.User, er
 		return nil, err
 	}
 
+	// category, _ := s.CategoryService.AddCategory(username, constants.DefaultCategoryName, "Default category for uncategorized transactions")
+
+	// s.BudgetService.CreateBudget(username, &category.ID, 0.0, time.Now().Month().String(), time.Now().Year())
+
+	if err := s.addDefaultCategoryAndBudget(user); err != nil {
+		return nil, err
+	}
+
 	return user, nil
+}
+
+// addDefaultCategoryAndBudget handles adding the default category and budget for a new user.
+func (s *UserService) addDefaultCategoryAndBudget(user *models.User) error {
+	// Add the default category
+	category, err := s.CategoryService.AddCategory(user.Username, constants.DefaultCategoryName, "Default category for uncategorized transactions")
+	if err != nil {
+		return err
+	}
+
+	// Add the default budget
+	_, err = s.BudgetService.CreateBudget(user.Username, &category.ID, 0.0, time.Now().Format("01"), time.Now().Year())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Login authenticates a user based on username and password

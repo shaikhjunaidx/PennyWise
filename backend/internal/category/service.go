@@ -7,6 +7,8 @@ import (
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
 
+var _ user.UserSignUpCategoryService = (*CategoryService)(nil)
+
 type CategoryService struct {
 	Repo        CategoryRepository
 	UserService *user.UserService

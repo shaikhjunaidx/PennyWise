@@ -16,9 +16,28 @@ import (
 	"gorm.io/gorm"
 )
 
-func SetupUserRoutes(router *mux.Router, db *gorm.DB) {
-	userRepo := user.NewUserRepository(db)
+// Initialize repositories
+func initRepositories(db *gorm.DB) (user.UserRepository, category.CategoryRepository, budget.BudgetRepository, transaction.TransactionRepository) {
+	return user.NewUserRepository(db), category.NewCategoryRepository(db), budget.NewBudgetRepository(db), transaction.NewTransactionRepository(db)
+}
+
+// Initialize services
+func initServices(db *gorm.DB) (*user.UserService, *category.CategoryService, *budget.BudgetService, *transaction.TransactionService) {
+	userRepo, categoryRepo, budgetRepo, transactionRepo := initRepositories(db)
+
 	userService := &user.UserService{Repo: userRepo}
+	categoryService := category.NewCategoryService(categoryRepo, userService)
+	budgetService := budget.NewBudgetService(budgetRepo, userService)
+	transactionService := transaction.NewTransactionService(transactionRepo, userRepo, categoryRepo, budgetService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
+
+	return userService, categoryService, budgetService, transactionService
+}
+
+func SetupUserRoutes(router *mux.Router, db *gorm.DB) {
+	userService, _, _, _ := initServices(db)
 
 	router.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 	router.HandleFunc("/api/signup", userHandlers.SignUpHandler(userService)).Methods("POST")
@@ -26,14 +45,7 @@ func SetupUserRoutes(router *mux.Router, db *gorm.DB) {
 }
 
 func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
-	userRepo := user.NewUserRepository(db)
-	categoryRepo := category.NewCategoryRepository(db)
-	transactionRepo := transaction.NewTransactionRepository(db)
-	budgetRepo := budget.NewBudgetRepository(db)
-	userService := user.NewUserService(userRepo)
-	budgetService := budget.NewBudgetService(budgetRepo, userService)
-
-	transactionService := transaction.NewTransactionService(transactionRepo, userRepo, categoryRepo, budgetService)
+	_, _, _, transactionService := initServices(db)
 
 	transactionRouter := router.PathPrefix("/api/transactions").Subrouter()
 	transactionRouter.Use(middleware.JWTMiddleware)
@@ -43,16 +55,11 @@ func SetupTransactionRoutes(router *mux.Router, db *gorm.DB) {
 	transactionRouter.HandleFunc("/{id:[0-9]+}", transactionHandlers.DeleteTransactionHandler(transactionService)).Methods("DELETE")
 	transactionRouter.HandleFunc("/{id:[0-9]+}", transactionHandlers.GetTransactionByIDHandler(transactionService)).Methods("GET")
 	transactionRouter.HandleFunc("", transactionHandlers.GetTransactionsHandler(transactionService)).Methods("GET")
-
 	transactionRouter.HandleFunc("/category/{category_id:[0-9]+}", transactionHandlers.GetTransactionsByCategoryHandler(transactionService)).Methods("GET")
 }
 
 func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
-	userRepo := user.NewUserRepository(db)
-	userService := user.NewUserService(userRepo)
-
-	categoryRepo := category.NewCategoryRepository(db)
-	categoryService := category.NewCategoryService(categoryRepo, userService)
+	_, categoryService, _, _ := initServices(db)
 
 	categoryRouter := router.PathPrefix("/api/categories").Subrouter()
 
@@ -64,11 +71,7 @@ func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
 }
 
 func SetupBudgetRoutes(router *mux.Router, db *gorm.DB) {
-	userRepo := user.NewUserRepository(db)
-	userService := user.NewUserService(userRepo)
-
-	budgetRepo := budget.NewBudgetRepository(db)
-	budgetService := budget.NewBudgetService(budgetRepo, userService)
+	_, _, budgetService, _ := initServices(db)
 
 	budgetRouter := router.PathPrefix("/api/budgets").Subrouter()
 	budgetRouter.Use(middleware.JWTMiddleware)

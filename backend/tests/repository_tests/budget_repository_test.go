@@ -24,7 +24,7 @@ func setupBudgetTestRepo(t *testing.T) (*budget.BudgetRepositoryImpl, *gorm.DB) 
 
 func setupTestUserService(db *gorm.DB) *user.UserService {
 	userRepo := user.NewUserRepository(db)
-	return user.NewUserService(userRepo)
+	return user.NewUserService(userRepo, nil, nil)
 }
 
 func setupTestCategoryService(db *gorm.DB, userService *user.UserService) *category.CategoryService {
@@ -56,8 +56,13 @@ func createTestBudget(t *testing.T, repo *budget.BudgetRepositoryImpl, user *mod
 
 func TestBudgetRepository_Create(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
 	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -71,7 +76,13 @@ func TestBudgetRepository_Create(t *testing.T) {
 
 func TestBudgetRepository_CreateOverallBudget(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
+	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -83,8 +94,13 @@ func TestBudgetRepository_CreateOverallBudget(t *testing.T) {
 
 func TestBudgetRepository_FindByID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
 	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -102,7 +118,13 @@ func TestBudgetRepository_FindByID(t *testing.T) {
 
 func TestBudgetRepository_FindOverallBudget(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
+	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -118,8 +140,13 @@ func TestBudgetRepository_FindOverallBudget(t *testing.T) {
 
 func TestBudgetRepository_FindAllByUserID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
 	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user and two categories
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -136,13 +163,18 @@ func TestBudgetRepository_FindAllByUserID(t *testing.T) {
 	// Find all budgets for the user
 	budgets, err := repo.FindAllByUserID(user.ID)
 	assert.NoError(t, err)
-	assert.Len(t, budgets, 2)
+	assert.Len(t, budgets, 3) // Extra for the miscellaneous budget!
 }
 
 func TestBudgetRepository_Update(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
 	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -168,8 +200,13 @@ func TestBudgetRepository_Update(t *testing.T) {
 
 func TestBudgetRepository_DeleteByID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
 	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -190,8 +227,13 @@ func TestBudgetRepository_DeleteByID(t *testing.T) {
 
 func TestBudgetRepository_FindByUserIDAndCategoryID(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
 	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user and a category
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")
@@ -209,7 +251,13 @@ func TestBudgetRepository_FindByUserIDAndCategoryID(t *testing.T) {
 
 func TestBudgetRepository_UpdateOverallBudget(t *testing.T) {
 	repo, db := setupBudgetTestRepo(t)
+
 	userService := setupTestUserService(db)
+	categoryService := setupTestCategoryService(db, userService)
+	budgetService := budget.NewBudgetService(repo, userService)
+
+	userService.CategoryService = categoryService
+	userService.BudgetService = budgetService
 
 	// Create a user
 	user, err := userService.SignUp("john_doe", "john.doe@example.com", "password")

@@ -7,10 +7,14 @@ import (
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
 
+
+
 type BudgetService struct {
 	Repo        BudgetRepository
 	UserService *user.UserService
 }
+
+var _ user.UserSignUpBudgetService = (*BudgetService)(nil)
 
 func NewBudgetService(repo BudgetRepository, userService *user.UserService) *BudgetService {
 	return &BudgetService{
