@@ -1,6 +1,8 @@
 package budget
 
 import (
+	"time"
+
 	"github.com/shaikhjunaidx/pennywise-backend/internal/user"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
@@ -106,7 +108,11 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget,
 		return nil, err
 	}
 
-	budgets, err := s.Repo.FindAllByUserID(user.ID)
+	currentTime := time.Now()
+	currentMonth := currentTime.Format("01") // Month as string with leading zero
+	currentYear := currentTime.Year()
+
+	budgets, err := s.Repo.FindAllByUserIDAndMonthYear(user.ID, currentMonth, currentYear)
 	if err != nil {
 		return nil, err
 	}
@@ -116,8 +122,8 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget,
 		AmountLimit:     0,
 		SpentAmount:     0,
 		RemainingAmount: 0,
-		BudgetMonth:     "",
-		BudgetYear:      0,
+		BudgetMonth:     currentMonth,
+		BudgetYear:      currentYear,
 	}
 
 	for _, budget := range budgets {

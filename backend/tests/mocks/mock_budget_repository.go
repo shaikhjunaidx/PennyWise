@@ -38,3 +38,8 @@ func (m *MockBudgetRepository) FindByUserIDAndCategoryID(userID uint, categoryID
 	args := m.Called(userID, categoryID, month, year)
 	return args.Get(0).(*models.Budget), args.Error(1)
 }
+
+func (m *MockBudgetRepository) FindAllByUserIDAndMonthYear(userID uint, month string, year int) ([]*models.Budget, error) {
+	args := m.Called(userID, month, year)
+	return args.Get(0).([]*models.Budget), args.Error(1)
+}

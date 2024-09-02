@@ -61,3 +61,15 @@ func (r *BudgetRepositoryImpl) FindByUserIDAndCategoryID(userID uint, categoryID
 	}
 	return &budget, nil
 }
+
+func (r *BudgetRepositoryImpl) FindAllByUserIDAndMonthYear(userID uint, month string, year int) ([]*models.Budget, error) {
+	var budgets []*models.Budget
+
+	monthFormatted := fmt.Sprintf("%02d", time.Now().Month())
+
+	err := r.DB.Where("user_id = ? AND budget_month = ? AND budget_year = ?", userID, monthFormatted, year).Find(&budgets).Error
+	if err != nil {
+		return nil, err
+	}
+	return budgets, nil
+}
