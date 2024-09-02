@@ -74,7 +74,7 @@ const Dashboard = () => {
     setShowAddBudgetForm(true);
   };
 
-  const closeHandleAddBudgetClick = (newBudget) => {
+  const closeHandleAddBudgetClick = () => {
     setShowAddBudgetForm(false);
   };
 
@@ -87,9 +87,7 @@ const Dashboard = () => {
       <NavbarLoggedIn />
       <div className="DashboardCont">
       {showAddTransForm && <AddTransactionForm onAddTransaction={closehandleAddTransactionClick} />}
-      {showAddBudgetForm && (
-          <AddBudgetForm onAddBudget={closeHandleAddBudgetClick} onClose={() => setShowAddBudgetForm(false)} />
-        )}
+      {showAddBudgetForm && (<AddBudgetForm onAddBudget={closeHandleAddBudgetClick}  />)}
       
         <section id="overall" className="overalls">
             

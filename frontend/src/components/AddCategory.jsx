@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const AddBudgetForm = ({ onAddBudget, onClose }) => {
+const AddBudgetForm = ({ onAddBudget}) => {
   const [formData, setFormData] = useState({
     category_name: "",
     description: "",
@@ -11,7 +11,6 @@ const AddBudgetForm = ({ onAddBudget, onClose }) => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const formRef = useRef(null);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -98,15 +97,14 @@ const AddBudgetForm = ({ onAddBudget, onClose }) => {
     }
   };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
+  const handleBackgroundClick = (e) => {
+    if (e.target === e.currentTarget) {
+        onAddBudget();
+    }
+  };
 
   return (
-    <div className="addBudgetFormContainer" ref={formRef}>
+    <div className="addBudgetFormContainer" onClick={handleBackgroundClick}>
         <div className="addBudgetForm">
       <h2 className="budgetFormTitle">Add Budget</h2>
       <form onSubmit={handleSubmit}>
@@ -156,16 +154,29 @@ const AddBudgetForm = ({ onAddBudget, onClose }) => {
           />
         </div>
         <div className="formGroup">
-          <label htmlFor="budget_month">Budget Month:</label>
-          <input
-            type="text"
-            id="budget_month"
-            name="budget_month"
-            value={formData.budget_month}
-            onChange={handleChange}
-            required
-          />
-        </div>
+            <label htmlFor="budget_month">Budget Month:</label>
+            <select
+              id="budget_month"
+              name="budget_month"
+              value={formData.budget_month}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select Month</option>
+              <option value="01">January</option>
+              <option value="02">February</option>
+              <option value="03">March</option>
+              <option value="04">April</option>
+              <option value="05">May</option>
+              <option value="06">June</option>
+              <option value="07">July</option>
+              <option value="08">August</option>
+              <option value="09">September</option>
+              <option value="10">October</option>
+              <option value="11">November</option>
+              <option value="12">December</option>
+            </select>
+          </div>
         <button type="submit" className="submitButton" disabled={loading}>
           {loading ? "Submitting..." : "Add Budget"}
         </button>
