@@ -62,6 +62,7 @@ func SetupCategoryRoutes(router *mux.Router, db *gorm.DB) {
 	_, categoryService, _, _ := initServices(db)
 
 	categoryRouter := router.PathPrefix("/api/categories").Subrouter()
+	categoryRouter.Use(middleware.JWTMiddleware)
 
 	categoryRouter.HandleFunc("", categoryHandlers.CreateCategoryHandler(categoryService)).Methods("POST")
 	categoryRouter.HandleFunc("/{id:[0-9]+}", categoryHandlers.GetCategoryByIDHandler(categoryService)).Methods("GET")
