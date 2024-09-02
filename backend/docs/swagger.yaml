@@ -45,6 +45,29 @@ definitions:
       username:
         type: string
     type: object
+  models.Budget:
+    properties:
+      amount_limit:
+        type: number
+      budget_month:
+        type: string
+      budget_year:
+        type: integer
+      category_id:
+        type: integer
+      created_at:
+        type: string
+      id:
+        type: integer
+      remaining_amount:
+        type: number
+      spent_amount:
+        type: number
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   models.Category:
     properties:
       created_at:
@@ -57,6 +80,8 @@ definitions:
         type: string
       updated_at:
         type: string
+      user_id:
+        type: integer
     type: object
   models.Transaction:
     properties:
@@ -80,9 +105,226 @@ definitions:
 info:
   contact: {}
 paths:
+  /api/budgets:
+    get:
+      description: Retrieves all budgets associated with the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Budgets
+          schema:
+            items:
+              $ref: '#/definitions/models.Budget'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Budgets for User
+      tags:
+      - budgets
+    post:
+      consumes:
+      - application/json
+      description: Creates a new budget for a user, either overall or for a specific
+        category.
+      parameters:
+      - description: Budget Data
+        in: body
+        name: budget
+        required: true
+        schema:
+          $ref: '#/definitions/models.Budget'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created Budget
+          schema:
+            $ref: '#/definitions/models.Budget'
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Create Budget
+      tags:
+      - budgets
+  /api/budgets/{id}:
+    delete:
+      description: Deletes a budget by its ID.
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Invalid Budget ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Budget not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Delete Budget
+      tags:
+      - budgets
+    get:
+      description: Retrieves a budget by its ID.
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Budget
+          schema:
+            $ref: '#/definitions/models.Budget'
+        "400":
+          description: Invalid Budget ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Budget not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Budget by ID
+      tags:
+      - budgets
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing budget by ID.
+      parameters:
+      - description: Budget ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Updated Budget Data
+        in: body
+        name: budget
+        required: true
+        schema:
+          $ref: '#/definitions/models.Budget'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated Budget
+          schema:
+            $ref: '#/definitions/models.Budget'
+        "400":
+          description: Invalid request payload
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Budget not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Update Budget
+      tags:
+      - budgets
+  /api/budgets/category/{categoryID}:
+    get:
+      description: Retrieves the budget for the specified category ID for the current
+        month and year for the logged-in user.
+      parameters:
+      - description: Category ID
+        in: path
+        name: categoryID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Budget
+          schema:
+            $ref: '#/definitions/models.Budget'
+        "400":
+          description: Invalid Category ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Budget not found
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Budget by Category ID
+      tags:
+      - budgets
+  /api/budgets/overall:
+    get:
+      description: Retrieves the overall budget, including all categories, for the
+        authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Overall Budget
+          schema:
+            $ref: '#/definitions/models.Budget'
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Overall Budget
+      tags:
+      - budgets
   /api/categories:
     get:
-      description: Retrieves all categories.
+      description: Retrieves all categories for the authenticated user.
       produces:
       - application/json
       responses:
