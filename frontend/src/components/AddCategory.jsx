@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 
-const AddBudgetForm = ({ onAddBudget, onClose }) => {
+const AddBudgetForm = ({ onAddBudget}) => {
   const [formData, setFormData] = useState({
     category_name: "",
     description: "",
@@ -59,7 +59,7 @@ const AddBudgetForm = ({ onAddBudget, onClose }) => {
         body: JSON.stringify({
           amount_limit: parseFloat(formData.amount),
           budget_year: parseInt(formData.budget_year),
-          budget_month: formData.budget_month,
+          budget_month: parseInt(formData.budget_month),
           category_id: category_id,
         }),
       });
@@ -92,21 +92,14 @@ const AddBudgetForm = ({ onAddBudget, onClose }) => {
     }
   };
 
-  const handleClickOutside = (event) => {
-    if (formRef.current && !formRef.current.contains(event.target)) {
-      onClose();
+  const handleBackgroundClick = (e) => {
+    if (e.target === e.currentTarget) {
+        onAddBudget();
     }
   };
 
-  useEffect(() => {
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, []);
-
   return (
-    <div className="addBudgetFormContainer" ref={formRef}>
+    <div className="addBudgetFormContainer" onClick={handleBackgroundClick}>
         <div className="addBudgetForm">
       <h2 className="budgetFormTitle">Add Budget</h2>
       <form onSubmit={handleSubmit}>
@@ -158,7 +151,7 @@ const AddBudgetForm = ({ onAddBudget, onClose }) => {
         <div className="formGroup">
           <label htmlFor="budget_month">Budget Month:</label>
           <input
-            type="text"
+            type="number"
             id="budget_month"
             name="budget_month"
             value={formData.budget_month}
