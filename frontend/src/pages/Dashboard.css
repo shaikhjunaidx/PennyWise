@@ -132,3 +132,22 @@
   .button-1:focus {
     background-color: #13040a;
   }
+
+  .overalls {
+    width: 100%;
+    margin: 0 auto;
+    padding: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+  }
+
+  .categoriesCont{
+    display: flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    align-items: center;
+    width: 100%;
+    gap: 8px;
+  }
