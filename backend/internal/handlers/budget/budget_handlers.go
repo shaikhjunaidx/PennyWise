@@ -3,6 +3,7 @@ package handlers
 import (
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/shaikhjunaidx/pennywise-backend/internal/budget"
@@ -195,4 +196,50 @@ func GetOverallBudgetHandler(service *budget.BudgetService) http.HandlerFunc {
 
 		handlers.SendJSONResponse(w, overallBudget, http.StatusOK)
 	}
+}
+
+// GetBudgetForUserAndCategoryHandler handles retrieving a budget by category ID for a specific user.
+// @Summary Get Budget by Category ID
+// @Description Retrieves the budget for the specified category ID for the current month and year for the logged-in user.
+// @Tags budgets
+// @Produce  json
+// @Param categoryID path int true "Category ID"
+// @Success 200 {object} models.Budget "Budget"
+// @Failure 400 {object} map[string]interface{} "Invalid Category ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 404 {object} map[string]interface{} "Budget not found"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /api/budgets/category/{categoryID} [get]
+func GetBudgetForUserAndCategoryHandler(service *budget.BudgetService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		vars := mux.Vars(r)
+		categoryIDStr := vars["category_id"]
+		categoryID, err := strconv.ParseUint(categoryIDStr, 10, 32)
+		if err != nil {
+			handlers.SendErrorResponse(w, "Invalid Category ID", http.StatusBadRequest)
+			return
+		}
+
+		month := strconv.Itoa(int(time.Now().Month()))
+		year := time.Now().Year()
+
+		budget, err := service.GetBudgetForUserAndCategory(username, uintPtr(uint(categoryID)), month, year)
+		if err != nil {
+			handlers.SendErrorResponse(w, "Budget not found", http.StatusNotFound)
+			return
+		}
+
+		handlers.SendJSONResponse(w, budget, http.StatusOK)
+	}
+}
+
+// Helper function to return a pointer to a uint
+func uintPtr(i uint) *uint {
+	return &i
 }
