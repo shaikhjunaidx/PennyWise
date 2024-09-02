@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import { jwtDecode } from 'jwt-decode';
 
 const AddTransactionForm = ({ onAddTransaction }) => {
-    console.log('here')
   const [formData, setFormData] = useState({
     category_id: 0,
     description: '',
@@ -10,6 +9,7 @@ const AddTransactionForm = ({ onAddTransaction }) => {
     transaction_date: ''
   });
 
+  const [categories, setCategories] = useState([]);
   const [userName, setUserName] = useState(null);
 
   useEffect(() => {
@@ -19,6 +19,32 @@ const AddTransactionForm = ({ onAddTransaction }) => {
       setUserName(decodedToken.sub); 
     }
   }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const token = localStorage.getItem("token"); 
+      try {
+        const response = await fetch("http://localhost:8080/api/categories", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`, 
+            "Content-Type": "application/json",
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch categories");
+        }
+        const data = await response.json();
+        setCategories(data);
+      } catch (error) {
+        console.error(error.message);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -89,15 +115,21 @@ const AddTransactionForm = ({ onAddTransaction }) => {
       <h2 className="formTitle">Add Transaction</h2>
       <form onSubmit={handleSubmit} className="AddTransFormDiv">
         <div className="formGroup">
-          <label htmlFor="category_id">Category:</label>
-          <input
-            type="number"
-            id="category_id"
-            name="category_id"
-            value={formData.category_id}
-            onChange={handleChange}
-            required
-          />
+        <label htmlFor="category_id">Category:</label>
+            <select
+              id="category_id"
+              name="category_id"
+              value={formData.category_id}
+              onChange={handleChange}
+              required
+            >
+              <option value="">Select a category</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
         </div>
         <div className="formGroup">
           <label htmlFor="description">Description:</label>

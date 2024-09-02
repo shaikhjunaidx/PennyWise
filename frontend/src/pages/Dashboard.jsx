@@ -5,6 +5,8 @@ import './AddTransactionForm.css';
 import AddTransactionForm from "../components/AddTransactionForm";
 import BudgetSummary from "../components/BudgetSummary";
 import './BudgetSummary.css';
+import AddBudgetForm from "../components/AddCategory";
+import './AddCategory.css';
 
 const Dashboard = () => {
   const [showAll, setShowAll] = useState(false);
@@ -13,6 +15,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showAddTransForm, setShowAddTransForm] = useState(false);
+  const [showAddBudgetForm, setShowAddBudgetForm] = useState(false);
 
     const [budget, setBudget] = useState({
         total: 250, 
@@ -67,15 +70,26 @@ const Dashboard = () => {
     }
   };
 
+  const handleAddBudgetClick = () => {
+    setShowAddBudgetForm(true);
+  };
 
-  const displayedTransactions = showAll ? transactions : transactions.slice(0, 6);
-  const progressPercentage = (budget.spent / budget.total) * 100;
+  const closeHandleAddBudgetClick = (newBudget) => {
+    setShowAddBudgetForm(false);
+  };
+
+  const displayedTransactions = showAll
+  ? (transactions || []).slice(0, 6)
+  : (transactions || []).slice(0, 6);
 
   return (
     <>
       <NavbarLoggedIn />
       <div className="DashboardCont">
       {showAddTransForm && <AddTransactionForm onAddTransaction={closehandleAddTransactionClick} />}
+      {showAddBudgetForm && (
+          <AddBudgetForm onAddBudget={closeHandleAddBudgetClick} onClose={() => setShowAddBudgetForm(false)} />
+        )}
       
         <section id="overall" className="overalls">
             
@@ -87,6 +101,7 @@ const Dashboard = () => {
             <BudgetSummary budget={budget} heading="Random BS" color="hsl(355, 57%, 57%)" />
             <BudgetSummary budget={budget} heading="Months Budget" color="hsl(355, 57%, 57%)" />
         </div>
+        <button className="AddCategoryButton" onClick={handleAddBudgetClick}>Add New Budget</button>
         </section>
 
         <section id="Transactions" className="Transactions">
@@ -103,10 +118,10 @@ const Dashboard = () => {
                 </tr>
               </thead>
               <tbody>
-                {displayedTransactions.map((transaction) => (
+              {(displayedTransactions || []).map((transaction)  => (
                   <tr key={transaction.id}>
                     <td>{transaction.id}</td>
-                    <td>{transaction.category_id}</td>
+                    <td>{transaction.category_name}</td>
                     <td>{transaction.amount.toFixed(2)}</td>
                     <td>{transaction.description || "N/A"}</td>
                     <td>{new Date(transaction.transaction_date).toLocaleString()}</td>

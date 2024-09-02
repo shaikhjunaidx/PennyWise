@@ -98,6 +98,7 @@
   }
 
   .showMoreButton,
+  .AddCategoryButton,
   .AddTransaction{
     background-color: #42b6da;
     border-radius: 8px;
