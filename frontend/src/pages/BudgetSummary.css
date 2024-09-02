@@ -1,18 +1,9 @@
 /* Overall budgets section */
-.overalls {
-    width: 50%;
-    max-width: 1000px;
-    margin: 0 auto;
-    padding: 16px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
+
   
   .budget {
     margin-top: 2%;
-    width: 70%;
+    width: 35%;
     padding: 16px;
     border-radius: 12px;
     border: 2px solid var(--border-color); /* Use CSS variable for border color */
@@ -50,7 +41,7 @@
   
   /* Custom progress bar styling */
   .overallProgress {
-    width: 100%;
+    width: 70%;
     height: 24px;
     border-radius: 8px;
     background: #e0e0e0;

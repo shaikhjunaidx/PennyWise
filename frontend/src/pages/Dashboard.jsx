@@ -78,7 +78,15 @@ const Dashboard = () => {
       {showAddTransForm && <AddTransactionForm onAddTransaction={closehandleAddTransactionClick} />}
       
         <section id="overall" className="overalls">
+            
             <BudgetSummary budget={budget} heading="Months Budget" color="hsl(355, 57%, 57%)" />
+            <h1 className="sectionHeader">Categories</h1>
+        <div className="categoriesCont">
+            <BudgetSummary budget={budget} heading="Health" color="hsl(355, 57%, 57%)" />
+            <BudgetSummary budget={budget} heading="Finance" color="hsl(355, 57%, 57%)" />
+            <BudgetSummary budget={budget} heading="Random BS" color="hsl(355, 57%, 57%)" />
+            <BudgetSummary budget={budget} heading="Months Budget" color="hsl(355, 57%, 57%)" />
+        </div>
         </section>
 
         <section id="Transactions" className="Transactions">
