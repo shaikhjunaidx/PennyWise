@@ -113,7 +113,7 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget,
 	}
 
 	currentTime := time.Now()
-	currentMonth := currentTime.Format("01") // Month as string with leading zero
+	currentMonth := currentTime.Format("01")
 	currentYear := currentTime.Year()
 
 	budgets, err := s.Repo.FindAllByUserIDAndMonthYear(user.ID, currentMonth, currentYear)
