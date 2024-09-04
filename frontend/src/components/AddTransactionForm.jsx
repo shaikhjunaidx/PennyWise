@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { jwtDecode } from 'jwt-decode';
+import { fetchCategories } from "../utils/fetchCategories,jsx";
 
 const AddTransactionForm = ({ onAddTransaction }) => {
   const [formData, setFormData] = useState({
@@ -21,29 +22,17 @@ const AddTransactionForm = ({ onAddTransaction }) => {
   }, []);
 
   useEffect(() => {
-    const fetchCategories = async () => {
-      const token = localStorage.getItem("token"); 
+    const getCategories = async () => {
       try {
-        const response = await fetch("http://localhost:8080/api/categories", {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`, 
-            "Content-Type": "application/json",
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch categories");
-        }
-        const data = await response.json();
+        const data = await fetchCategories();
         setCategories(data);
       } catch (error) {
-        console.error(error.message);
+        console.error("Error fetching categories:", error.message);
       }
     };
 
-    fetchCategories();
+    getCategories();
   }, []);
-
 
 
   const handleChange = (e) => {

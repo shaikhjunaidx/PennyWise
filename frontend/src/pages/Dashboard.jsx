@@ -7,6 +7,7 @@ import BudgetSummary from "../components/BudgetSummary";
 import './BudgetSummary.css';
 import AddBudgetForm from "../components/AddCategory";
 import './AddCategory.css';
+import { fetchCategories } from "../utils/fetchCategories,jsx";
 
 const Dashboard = () => {
   const [showAll, setShowAll] = useState(false);
@@ -16,11 +17,10 @@ const Dashboard = () => {
   const [error, setError] = useState(null);
   const [showAddTransForm, setShowAddTransForm] = useState(false);
   const [showAddBudgetForm, setShowAddBudgetForm] = useState(false);
-
-    const [budget, setBudget] = useState({
-        total: 250, 
-        spent: 200 
-      });
+  const [categoryBudgets, setCategoryBudgets] = useState([]);
+  const [overallBudget, setOverallBudget] = useState(null);
+  const [categories, setCategories] = useState([]);
+  const [categoryMap, setCategoryMap] = useState({});
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -52,6 +52,86 @@ const Dashboard = () => {
     };
 
     fetchTransactions();
+  }, []);
+
+  useEffect(() => {
+    const fetchCategoryBudgets = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const response = await fetch("http://localhost:8080/api/budgets", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch category budgets");
+        }
+
+        const data = await response.json();
+        setCategoryBudgets(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchCategoryBudgets();
+  }, []);
+
+  useEffect(() => {
+    const fetchOverallBudget = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          throw new Error("No token found");
+        }
+
+        const response = await fetch("http://localhost:8080/api/budgets/overall", {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch overall budget");
+        }
+
+        const data = await response.json();
+        setOverallBudget(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchOverallBudget();
+  }, []);
+
+  
+
+  useEffect(() => {
+    const getCategories = async () => {
+      try {
+        const data = await fetchCategories();
+        setCategories(data);
+        const categoryLookup = {};
+        data.forEach(category => {
+          categoryLookup[category.id] = category.name; // Assume category object has 'id' and 'name'
+        });
+        setCategoryMap(categoryLookup); // Store the lookup object in state
+      } catch (error) {
+        console.error("Error fetching categories:", error.message);
+      }
+    };
+
+    getCategories();
   }, []);
 
   const handleShowMore = () => {
@@ -90,14 +170,31 @@ const Dashboard = () => {
       {showAddBudgetForm && (<AddBudgetForm onAddBudget={closeHandleAddBudgetClick}  />)}
       
         <section id="overall" className="overalls">
-            
-            <BudgetSummary budget={budget} heading="Months Budget" color="hsl(355, 57%, 57%)" />
-            <h1 className="sectionHeader">Categories</h1>
+             <h1 className="sectionHeader">Monthly Budget Summary</h1>
+          {overallBudget && (<BudgetSummary
+              budget={{
+                total: overallBudget.amount_limit,
+                spent: overallBudget.spent_amount,
+                remaining: overallBudget.remaining_amount
+              }}
+              heading="Overall Monthly Budget"
+              color="hsl(355, 57%, 57%)"
+            />
+          )}
+            <h2 className="subSectionHeader">Categories</h2>
         <div className="categoriesCont">
-            <BudgetSummary budget={budget} heading="Health" color="hsl(355, 57%, 57%)" />
-            <BudgetSummary budget={budget} heading="Finance" color="hsl(355, 57%, 57%)" />
-            <BudgetSummary budget={budget} heading="Random BS" color="hsl(355, 57%, 57%)" />
-            <BudgetSummary budget={budget} heading="Months Budget" color="hsl(355, 57%, 57%)" />
+        {categoryBudgets.map((budget) => (
+            <BudgetSummary
+              key={budget.id}
+              budget={{
+                total: budget.amount_limit,
+                spent: budget.spent_amount,
+                remaining: budget.remaining_amount
+              }}
+              heading={categoryMap[budget.category_id] || "Unknown Category"}
+              color="hsl(355, 57%, 57%)"
+            />
+          ))}
         </div>
         <button className="AddCategoryButton" onClick={handleAddBudgetClick}>Add New Budget</button>
         </section>
