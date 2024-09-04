@@ -1,3 +1,3 @@
 package constants
 
-const DefaultCategoryName = "General"
+const DefaultCategoryName = "Uncategorized"
