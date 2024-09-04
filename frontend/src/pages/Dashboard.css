@@ -18,6 +18,12 @@
     color: #333;
     text-align: center;
   }
+  .subSectionHeader {
+    font-size: 1.5em;
+    margin-bottom: 3px;
+    color: #333;
+    text-align: center;
+  }
   
   /* Transactions Table section*/
 
@@ -127,6 +133,7 @@
     grid-column: 3 / 4;
     grid-row: 4/5;
     align-self: center; 
+    border: 3px;
   }
   
   .button-1:hover,
@@ -151,4 +158,5 @@
     align-items: center;
     width: 100%;
     gap: 8px;
+    padding-bottom: 2%;
   }
