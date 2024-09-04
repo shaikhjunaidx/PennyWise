@@ -83,5 +83,6 @@ func SetupBudgetRoutes(router *mux.Router, db *gorm.DB) {
 	budgetRouter.HandleFunc("/{id:[0-9]+}", budgetHandlers.UpdateBudgetHandler(budgetService)).Methods("PUT")
 	budgetRouter.HandleFunc("/{id:[0-9]+}", budgetHandlers.DeleteBudgetHandler(budgetService)).Methods("DELETE")
 	budgetRouter.HandleFunc("/overall", budgetHandlers.GetOverallBudgetHandler(budgetService)).Methods("GET")
-	budgetRouter.HandleFunc("/category/{categoryID:[0-9]+}", budgetHandlers.GetBudgetForUserAndCategoryHandler(budgetService)).Methods("GET")
+	budgetRouter.HandleFunc("/category/{category_id:[0-9]+}", budgetHandlers.GetBudgetForUserAndCategoryHandler(budgetService)).Methods("GET")
+	budgetRouter.HandleFunc("/category/{category_id:[0-9]+}/history", budgetHandlers.GetBudgetHistoryByCategoryHandler(budgetService)).Methods("GET")
 }

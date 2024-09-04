@@ -22,6 +22,19 @@ type OverallBudgetResponse struct {
 	UncategorizedTotal float64 `json:"uncategorized_total"`
 }
 
+type MonthlyBudgetResponse struct {
+    Month          string  `json:"month"`
+    Year           int     `json:"year"`
+    AmountLimit    float64 `json:"amount_limit"`
+    SpentAmount    float64 `json:"spent_amount"`
+    RemainingAmount float64 `json:"remaining_amount"`
+}
+
+type CategoryBudgetHistoryResponse struct {
+    CategoryID      uint                    `json:"category_id"`
+    History         []MonthlyBudgetResponse `json:"history"`
+}
+
 var _ user.UserSignUpBudgetService = (*BudgetService)(nil)
 
 func NewBudgetService(repo BudgetRepository, userService *user.UserService) *BudgetService {
@@ -149,4 +162,46 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*OverallBudgetR
 	}
 
 	return overallBudget, nil
+}
+
+func (s *BudgetService) GetBudgetHistoryForCategory(username string, categoryID uint) (*CategoryBudgetHistoryResponse, error) {
+	user, err := s.UserService.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	currentTime := time.Now()
+
+	history := []MonthlyBudgetResponse{}
+
+	for i := 0; i < 4; i++ {
+		month := currentTime.AddDate(0, -i, 0).Format("01")
+		year := currentTime.AddDate(0, -i, 0).Year()
+
+		budget, err := s.Repo.FindByUserIDAndCategoryID(user.ID, &categoryID, month, year)
+		if err != nil {
+			// If no budget found, still add it to history with 0 values
+			history = append(history, MonthlyBudgetResponse{
+				Month:           month,
+				Year:            year,
+				AmountLimit:     0,
+				SpentAmount:     0,
+				RemainingAmount: 0,
+			})
+			continue
+		}
+
+		history = append(history, MonthlyBudgetResponse{
+			Month:           month,
+			Year:            year,
+			AmountLimit:     budget.AmountLimit,
+			SpentAmount:     budget.SpentAmount,
+			RemainingAmount: budget.RemainingAmount,
+		})
+	}
+
+	return &CategoryBudgetHistoryResponse{
+		CategoryID: categoryID,
+		History:    history,
+	}, nil
 }

@@ -10,4 +10,5 @@ type CategoryRepository interface {
 	FindAllByUserID(userID uint) ([]*models.Category, error)
 	Update(category *models.Category) error
 	DeleteByID(id uint) error
+	FindByNameAndUserID(name string, userID uint) (*models.Category, error)
 }

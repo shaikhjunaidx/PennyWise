@@ -237,7 +237,7 @@ func GetBudgetForUserAndCategoryHandler(service *budget.BudgetService) http.Hand
 			return
 		}
 
-		month := strconv.Itoa(int(time.Now().Month()))
+		month := time.Now().Format("January")
 		year := time.Now().Year()
 
 		budget, err := service.GetBudgetForUserAndCategory(username, uintPtr(uint(categoryID)), month, year)
@@ -247,6 +247,42 @@ func GetBudgetForUserAndCategoryHandler(service *budget.BudgetService) http.Hand
 		}
 
 		handlers.SendJSONResponse(w, budget, http.StatusOK)
+	}
+}
+
+// GetBudgetHistoryByCategoryHandler handles retrieving the last 4 months of budget history for a category.
+// @Summary Get Budget History by Category
+// @Description Retrieves the last 4 months of budget and spending for the given category.
+// @Tags budgets
+// @Produce  json
+// @Param categoryID path int true "Category ID"
+// @Success 200 {object} CategoryBudgetHistoryResponse "Budget History"
+// @Failure 400 {object} map[string]interface{} "Invalid Category ID"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /api/budgets/category/{categoryID}/history [get]
+func GetBudgetHistoryByCategoryHandler(service *budget.BudgetService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		vars := mux.Vars(r)
+		categoryIDStr := vars["category_id"]
+		categoryID, err := strconv.ParseUint(categoryIDStr, 10, 32)
+		if err != nil {
+			handlers.SendErrorResponse(w, "Invalid Category ID", http.StatusBadRequest)
+			return
+		}
+
+		budgetHistory, err := service.GetBudgetHistoryForCategory(username, uint(categoryID))
+		if err != nil {
+			handlers.SendErrorResponse(w, "Failed to retrieve budget history", http.StatusInternalServerError)
+			return
+		}
+
+		handlers.SendJSONResponse(w, budgetHistory, http.StatusOK)
 	}
 }
 

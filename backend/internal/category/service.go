@@ -27,6 +27,11 @@ func (s *CategoryService) AddCategory(username, name, description string) (*mode
 		return nil, err
 	}
 
+	existingCategory, err := s.Repo.FindByNameAndUserID(name, user.ID)
+	if err == nil && existingCategory != nil {
+		return existingCategory, nil
+	}
+
 	category := &models.Category{
 		UserID:      user.ID,
 		Name:        name,

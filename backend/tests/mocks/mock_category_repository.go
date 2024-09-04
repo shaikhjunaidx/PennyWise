@@ -43,3 +43,8 @@ func (m *MockCategoryRepository) FindAllByUserID(userID uint) ([]*models.Categor
 	args := m.Called(userID)
 	return args.Get(0).([]*models.Category), args.Error(1)
 }
+
+func (m *MockCategoryRepository) FindByNameAndUserID(name string, userID uint) (*models.Category, error) {
+	args := m.Called(name)
+	return args.Get(0).(*models.Category), args.Error(1)
+}

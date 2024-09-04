@@ -3,6 +3,7 @@ package budget
 import (
 	"errors"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/shaikhjunaidx/pennywise-backend/models"
@@ -47,13 +48,17 @@ func (r *BudgetRepositoryImpl) FindAllByUserID(userID uint) ([]*models.Budget, e
 
 func (r *BudgetRepositoryImpl) FindByUserIDAndCategoryID(userID uint, categoryID *uint, month string, year int) (*models.Budget, error) {
 	var budget models.Budget
+	var monthFormatted string
 
-	parsedTime, err := time.Parse("January", month)
-	if err != nil {
-		return nil, errors.New("invalid month format")
+	if _, err := strconv.Atoi(month); err == nil && len(month) == 2 {
+		monthFormatted = month
+	} else {
+		parsedTime, err := time.Parse("January", month)
+		if err != nil {
+			return nil, errors.New("invalid month format")
+		}
+		monthFormatted = fmt.Sprintf("%02d", parsedTime.Month())
 	}
-
-	monthFormatted := fmt.Sprintf("%02d", parsedTime.Month())
 
 	query := r.DB.Where("user_id = ? AND budget_month = ? AND budget_year = ?", userID, monthFormatted, year)
 

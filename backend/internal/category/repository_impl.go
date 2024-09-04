@@ -56,3 +56,12 @@ func (r *CategoryRepositoryImpl) FindAllByUserID(userID uint) ([]*models.Categor
 	}
 	return categories, nil
 }
+
+func (r *CategoryRepositoryImpl) FindByNameAndUserID(name string, userID uint) (*models.Category, error) {
+    var category models.Category
+    err := r.DB.Where("name = ? AND user_id = ?", name, userID).First(&category).Error
+    if err != nil {
+        return nil, err
+    }
+    return &category, nil
+}
