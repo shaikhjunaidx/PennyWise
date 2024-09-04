@@ -1,13 +1,12 @@
 package budget
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/shaikhjunaidx/pennywise-backend/internal/user"
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 )
-
-
 
 type BudgetService struct {
 	Repo        BudgetRepository
@@ -116,6 +115,7 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget,
 	currentMonth := currentTime.Format("01")
 	currentYear := currentTime.Year()
 
+	fmt.Println(currentMonth, currentYear)
 	budgets, err := s.Repo.FindAllByUserIDAndMonthYear(user.ID, currentMonth, currentYear)
 	if err != nil {
 		return nil, err
