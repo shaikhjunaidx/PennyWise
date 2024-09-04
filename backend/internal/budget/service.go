@@ -12,6 +12,16 @@ type BudgetService struct {
 	UserService *user.UserService
 }
 
+type OverallBudgetResponse struct {
+	UserID             uint    `json:"user_id"`
+	AmountLimit        float64 `json:"amount_limit"`
+	SpentAmount        float64 `json:"spent_amount"`
+	RemainingAmount    float64 `json:"remaining_amount"`
+	BudgetMonth        string  `json:"budget_month"`
+	BudgetYear         int     `json:"budget_year"`
+	UncategorizedTotal float64 `json:"uncategorized_total"`
+}
+
 var _ user.UserSignUpBudgetService = (*BudgetService)(nil)
 
 func NewBudgetService(repo BudgetRepository, userService *user.UserService) *BudgetService {
@@ -104,7 +114,7 @@ func (s *BudgetService) AddTransactionToBudget(userID uint, categoryID *uint, tr
 	return budget, nil
 }
 
-func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget, error) {
+func (s *BudgetService) CalculateOverallBudget(username string) (*OverallBudgetResponse, error) {
 	user, err := s.UserService.FindByUsername(username)
 	if err != nil {
 		return nil, err
@@ -119,7 +129,7 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget,
 		return nil, err
 	}
 
-	overallBudget := &models.Budget{
+	overallBudget := &OverallBudgetResponse{
 		UserID:          user.ID,
 		AmountLimit:     0,
 		SpentAmount:     0,
@@ -133,6 +143,8 @@ func (s *BudgetService) CalculateOverallBudget(username string) (*models.Budget,
 			overallBudget.AmountLimit += budget.AmountLimit
 			overallBudget.RemainingAmount += budget.RemainingAmount
 			overallBudget.SpentAmount += budget.SpentAmount
+		} else {
+			overallBudget.UncategorizedTotal += budget.SpentAmount
 		}
 	}
 
