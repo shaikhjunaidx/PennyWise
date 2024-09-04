@@ -1,4 +1,37 @@
 definitions:
+  budget.CategoryBudgetHistoryResponse:
+    properties:
+      category_id:
+        type: integer
+      history:
+        items:
+          $ref: '#/definitions/budget.MonthlyBudgetResponse'
+        type: array
+    type: object
+  budget.MonthlyBudgetResponse:
+    properties:
+      amount_limit:
+        type: number
+      month:
+        type: string
+      remaining_amount:
+        type: number
+      spent_amount:
+        type: number
+      year:
+        type: integer
+    type: object
+  handlers.BudgetRequest:
+    properties:
+      amount_limit:
+        type: number
+      budget_month:
+        type: string
+      budget_year:
+        type: integer
+      category_id:
+        type: integer
+    type: object
   handlers.CategoryRequest:
     properties:
       description:
@@ -37,6 +70,11 @@ definitions:
         type: string
       transaction_date:
         type: string
+    type: object
+  handlers.UpdateBudgetRequest:
+    properties:
+      amount_limit:
+        type: number
     type: object
   handlers.UserResponse:
     properties:
@@ -136,7 +174,7 @@ paths:
         name: budget
         required: true
         schema:
-          $ref: '#/definitions/models.Budget'
+          $ref: '#/definitions/handlers.BudgetRequest'
       produces:
       - application/json
       responses:
@@ -237,7 +275,7 @@ paths:
         name: budget
         required: true
         schema:
-          $ref: '#/definitions/models.Budget'
+          $ref: '#/definitions/handlers.UpdateBudgetRequest'
       produces:
       - application/json
       responses:
@@ -301,6 +339,36 @@ paths:
             additionalProperties: true
             type: object
       summary: Get Budget by Category ID
+      tags:
+      - budgets
+  /api/budgets/category/{categoryID}/history:
+    get:
+      description: Retrieves the last 4 months of budget and spending for the given
+        category.
+      parameters:
+      - description: Category ID
+        in: path
+        name: categoryID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Budget History
+          schema:
+            $ref: '#/definitions/budget.CategoryBudgetHistoryResponse'
+        "400":
+          description: Invalid Category ID
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Budget History by Category
       tags:
       - budgets
   /api/budgets/overall:

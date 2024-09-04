@@ -256,7 +256,7 @@ func GetBudgetForUserAndCategoryHandler(service *budget.BudgetService) http.Hand
 // @Tags budgets
 // @Produce  json
 // @Param categoryID path int true "Category ID"
-// @Success 200 {object} CategoryBudgetHistoryResponse "Budget History"
+// @Success 200 {object} budget.CategoryBudgetHistoryResponse "Budget History"
 // @Failure 400 {object} map[string]interface{} "Invalid Category ID"
 // @Failure 500 {object} map[string]interface{} "Internal server error"
 // @Router /api/budgets/category/{categoryID}/history [get]

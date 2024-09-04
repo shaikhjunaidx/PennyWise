@@ -63,7 +63,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Budget"
+                            "$ref": "#/definitions/handlers.BudgetRequest"
                         }
                     }
                 ],
@@ -133,6 +133,49 @@ const docTemplate = `{
                     },
                     "404": {
                         "description": "Budget not found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/budgets/category/{categoryID}/history": {
+            "get": {
+                "description": "Retrieves the last 4 months of budget and spending for the given category.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "budgets"
+                ],
+                "summary": "Get Budget History by Category",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "categoryID",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Budget History",
+                        "schema": {
+                            "$ref": "#/definitions/budget.CategoryBudgetHistoryResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Category ID",
                         "schema": {
                             "type": "object",
                             "additionalProperties": true
@@ -250,7 +293,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/models.Budget"
+                            "$ref": "#/definitions/handlers.UpdateBudgetRequest"
                         }
                     }
                 ],
@@ -905,6 +948,57 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "budget.CategoryBudgetHistoryResponse": {
+            "type": "object",
+            "properties": {
+                "category_id": {
+                    "type": "integer"
+                },
+                "history": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/budget.MonthlyBudgetResponse"
+                    }
+                }
+            }
+        },
+        "budget.MonthlyBudgetResponse": {
+            "type": "object",
+            "properties": {
+                "amount_limit": {
+                    "type": "number"
+                },
+                "month": {
+                    "type": "string"
+                },
+                "remaining_amount": {
+                    "type": "number"
+                },
+                "spent_amount": {
+                    "type": "number"
+                },
+                "year": {
+                    "type": "integer"
+                }
+            }
+        },
+        "handlers.BudgetRequest": {
+            "type": "object",
+            "properties": {
+                "amount_limit": {
+                    "type": "number"
+                },
+                "budget_month": {
+                    "type": "string"
+                },
+                "budget_year": {
+                    "type": "integer"
+                },
+                "category_id": {
+                    "type": "integer"
+                }
+            }
+        },
         "handlers.CategoryRequest": {
             "type": "object",
             "properties": {
@@ -960,6 +1054,14 @@ const docTemplate = `{
                 },
                 "transaction_date": {
                     "type": "string"
+                }
+            }
+        },
+        "handlers.UpdateBudgetRequest": {
+            "type": "object",
+            "properties": {
+                "amount_limit": {
+                    "type": "number"
                 }
             }
         },
