@@ -8,6 +8,22 @@ import './BudgetSummary.css';
 import AddBudgetForm from "../components/AddCategory";
 import './AddCategory.css';
 import { fetchCategories } from "../utils/fetchCategories,jsx";
+import { Line } from 'react-chartjs-2';
+import {
+  Chart as ChartJS,
+  LineElement,
+  PointElement,
+  CategoryScale,
+  LinearScale,
+  Title,
+  Tooltip,
+  Legend
+} from 'chart.js';
+import './TransacChart.css';
+
+
+ChartJS.register(LineElement, PointElement, CategoryScale, LinearScale, Title, Tooltip, Legend);
+
 
 const Dashboard = () => {
   const [showAll, setShowAll] = useState(false);
@@ -21,6 +37,7 @@ const Dashboard = () => {
   const [overallBudget, setOverallBudget] = useState(null);
   const [categories, setCategories] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
+  const [weeklyData, setWeeklyData] = useState([]);
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -114,7 +131,35 @@ const Dashboard = () => {
     fetchOverallBudget();
   }, []);
 
-  
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+
+    fetch('http://localhost:8080/api/transactions/weekly', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`, 
+      },
+    })
+      .then((response) => response.json())
+      .then((data) => setWeeklyData(data))
+      .catch((error) => console.error('Error fetching weekly data:', error));
+  }, []);
+
+  const chartData = {
+    labels: weeklyData.map((entry) => `Week ${entry.week}`),
+    datasets: [
+      {
+        label: 'Total Spent',
+        data: weeklyData.map((entry) => entry.total_spent),
+        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        fill: true,
+        tension: 0.1,
+      },
+    ],
+  };
+
 
   useEffect(() => {
     const getCategories = async () => {
@@ -231,7 +276,13 @@ const Dashboard = () => {
                 <button className="AddTransaction" onClick={handleAddTransactionClick}>Add Transaction</button>
           </div>
           </div>
-         
+          <h2>Weekly Spending Overview</h2>
+          {weeklyData.length > 0 && (
+              <div className="weekly-spending-chart">
+                
+                <Line data={chartData} />
+              </div>
+            )}
         </section>
       </div>
     </>
