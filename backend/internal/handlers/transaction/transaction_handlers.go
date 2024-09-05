@@ -202,6 +202,17 @@ func DeleteTransactionHandler(service *transaction.TransactionService) http.Hand
 	}
 }
 
+// GetTransactionsByCategoryHandler handles retrieving transactions for a specific category.
+// @Summary Get Transactions by Category ID
+// @Description Retrieves all transactions associated with a specific category for the authenticated user.
+// @Tags transactions
+// @Produce  json
+// @Param category_id path int true "Category ID"
+// @Success 200 {array} models.Transaction "List of Transactions"
+// @Failure 400 {object} map[string]interface{} "Invalid Category ID"
+// @Failure 401 {object} map[string]interface{} "Unauthorized"
+// @Failure 500 {object} map[string]interface{} "Failed to retrieve transactions"
+// @Router /api/transactions/category/{category_id} [get]
 func GetTransactionsByCategoryHandler(service *transaction.TransactionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username, ok := r.Context().Value(middleware.UsernameKey).(string)
@@ -226,5 +237,31 @@ func GetTransactionsByCategoryHandler(service *transaction.TransactionService) h
 		}
 
 		handlers.SendJSONResponse(w, transactions, http.StatusOK)
+	}
+}
+
+// GetWeeklySpendingHandler returns the weekly spending for a user.
+// @Summary Get Weekly Spending (Past 6 weeks)
+// @Description Retrieves the weekly spending for the authenticated user.
+// @Tags transactions
+// @Produce  json
+// @Success 200 {array} transaction.WeeklySpending "Weekly Spending"
+// @Failure 500 {object} map[string]interface{} "Internal server error"
+// @Router /api/transactions/weekly [get]
+func GetWeeklySpendingHandler(service *transaction.TransactionService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		username, ok := r.Context().Value(middleware.UsernameKey).(string)
+		if !ok || username == "" {
+			handlers.SendErrorResponse(w, "Username not found in context", http.StatusUnauthorized)
+			return
+		}
+
+		weeklySpending, err := service.GetWeeklySpending(username)
+		if err != nil {
+			handlers.SendErrorResponse(w, "Failed to retrieve weekly spending", http.StatusInternalServerError)
+			return
+		}
+
+		handlers.SendJSONResponse(w, weeklySpending, http.StatusOK)
 	}
 }

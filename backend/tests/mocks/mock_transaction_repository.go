@@ -39,3 +39,14 @@ func (m *MockTransactionRepository) FindAllByUserIDAndCategoryID(userID, categor
 	args := m.Called(userID, categoryID)
 	return args.Get(0).([]*transaction.TransactionResponse), args.Error(1)
 }
+
+func (m *MockTransactionRepository) GetWeeklySpending(userID uint) ([]transaction.WeeklySpending, error) {
+	args := m.Called(userID)
+
+	if weeklySpending, ok := args.Get(0).([]transaction.WeeklySpending); ok {
+		return weeklySpending, args.Error(1)
+	}
+
+	return nil, args.Error(1)
+
+}

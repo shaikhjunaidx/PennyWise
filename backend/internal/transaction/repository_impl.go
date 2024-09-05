@@ -1,9 +1,17 @@
 package transaction
 
 import (
+	"time"
+
 	"github.com/shaikhjunaidx/pennywise-backend/models"
 	"gorm.io/gorm"
 )
+
+type WeeklySpending struct {
+	Week       int     `json:"week"`
+	Year       int     `json:"year"`
+	TotalSpent float64 `json:"total_spent"`
+}
 
 type TransactionRepositoryImpl struct {
 	DB *gorm.DB
@@ -78,4 +86,41 @@ func (r *TransactionRepositoryImpl) FindAllByUserIDAndCategoryID(userID, categor
 		return nil, err
 	}
 	return transactions, nil
+}
+
+// func (r *TransactionRepositoryImpl) GetWeeklySpending(userID uint) ([]WeeklySpending, error) {
+// 	var weeklySpending []WeeklySpending
+
+// 	err := r.DB.Table("transactions").
+// 		Select("YEAR(transaction_date) as year, WEEK(transaction_date, 1) as week, SUM(amount) as total_spent").
+// 		Where("user_id = ?", userID).
+// 		Group("YEAR(transaction_date), WEEK(transaction_date, 1)").
+// 		Order("YEAR(transaction_date) DESC, WEEK(transaction_date, 1) DESC").
+// 		Scan(&weeklySpending).Error
+
+// 	if err != nil {
+// 		return nil, err
+// 	}
+
+// 	return weeklySpending, nil
+// }
+
+// returns last 6 weeks transaction totals
+func (r *TransactionRepositoryImpl) GetWeeklySpending(userID uint) ([]WeeklySpending, error) {
+	var weeklySpending []WeeklySpending
+
+	cutoffDate := time.Now().AddDate(0, 0, -6*7)
+
+	err := r.DB.Table("transactions").
+		Select("YEAR(transaction_date) as year, WEEK(transaction_date, 1) as week, SUM(amount) as total_spent").
+		Where("user_id = ? AND transaction_date >= ?", userID, cutoffDate).
+		Group("YEAR(transaction_date), WEEK(transaction_date, 1)").
+		Order("YEAR(transaction_date) DESC, WEEK(transaction_date, 1) DESC").
+		Scan(&weeklySpending).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return weeklySpending, nil
 }

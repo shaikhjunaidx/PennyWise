@@ -140,6 +140,15 @@ definitions:
       user_id:
         type: integer
     type: object
+  transaction.WeeklySpending:
+    properties:
+      total_spent:
+        type: number
+      week:
+        type: integer
+      year:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
@@ -780,6 +789,63 @@ paths:
             additionalProperties: true
             type: object
       summary: Update Transaction
+      tags:
+      - transactions
+  /api/transactions/category/{category_id}:
+    get:
+      description: Retrieves all transactions associated with a specific category
+        for the authenticated user.
+      parameters:
+      - description: Category ID
+        in: path
+        name: category_id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of Transactions
+          schema:
+            items:
+              $ref: '#/definitions/models.Transaction'
+            type: array
+        "400":
+          description: Invalid Category ID
+          schema:
+            additionalProperties: true
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Failed to retrieve transactions
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Transactions by Category ID
+      tags:
+      - transactions
+  /api/transactions/weekly:
+    get:
+      description: Retrieves the weekly spending for the authenticated user.
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Weekly Spending
+          schema:
+            items:
+              $ref: '#/definitions/transaction.WeeklySpending'
+            type: array
+        "500":
+          description: Internal server error
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Get Weekly Spending (Past 6 weeks)
       tags:
       - transactions
 swagger: "2.0"

@@ -794,6 +794,89 @@ const docTemplate = `{
                 }
             }
         },
+        "/api/transactions/category/{category_id}": {
+            "get": {
+                "description": "Retrieves all transactions associated with a specific category for the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Get Transactions by Category ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Category ID",
+                        "name": "category_id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "List of Transactions",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid Category ID",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "500": {
+                        "description": "Failed to retrieve transactions",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
+        "/api/transactions/weekly": {
+            "get": {
+                "description": "Retrieves the weekly spending for the authenticated user.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "transactions"
+                ],
+                "summary": "Get Weekly Spending (Past 6 weeks)",
+                "responses": {
+                    "200": {
+                        "description": "Weekly Spending",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/transaction.WeeklySpending"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    }
+                }
+            }
+        },
         "/api/transactions/{id}": {
             "get": {
                 "description": "Retrieves a single transaction by its ID for the authenticated user.",
@@ -1159,6 +1242,20 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "transaction.WeeklySpending": {
+            "type": "object",
+            "properties": {
+                "total_spent": {
+                    "type": "number"
+                },
+                "week": {
+                    "type": "integer"
+                },
+                "year": {
                     "type": "integer"
                 }
             }

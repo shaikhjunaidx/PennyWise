@@ -9,4 +9,5 @@ type TransactionRepository interface {
 	FindByID(id uint) (*models.Transaction, error)
 	FindAllByUsername(username string) ([]*TransactionResponse, error)
 	FindAllByUserIDAndCategoryID(userID uint, categoryID uint) ([]*TransactionResponse, error)
+	GetWeeklySpending(userID uint) ([]WeeklySpending, error)
 }

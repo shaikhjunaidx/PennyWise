@@ -142,3 +142,17 @@ func (s *TransactionService) GetTransactionsByCategoryID(username string, catego
 	return transactions, nil
 
 }
+
+func (s *TransactionService) GetWeeklySpending(username string) ([]WeeklySpending, error) {
+	user, err := s.UserRepo.FindByUsername(username)
+	if err != nil {
+		return nil, err
+	}
+
+	weeklySpending, err := s.Repo.GetWeeklySpending(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return weeklySpending, nil
+}
