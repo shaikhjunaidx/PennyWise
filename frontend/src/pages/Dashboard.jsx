@@ -1,4 +1,5 @@
 import React, { useState,useEffect } from "react";
+import { useNavigate } from 'react-router-dom';
 import NavbarLoggedIn from "../components/NavbarLoggedIn";
 import './Dashboard.css';
 import './AddTransactionForm.css';
@@ -38,6 +39,11 @@ const Dashboard = () => {
   const [categories, setCategories] = useState([]);
   const [categoryMap, setCategoryMap] = useState({});
   const [weeklyData, setWeeklyData] = useState([]);
+  const navigate = useNavigate();
+  const handleCategoryClick = (categoryId) => {
+    console.log("Category clicked")
+    navigate(`/category-summary/${categoryId}`);
+  };
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -238,6 +244,8 @@ const Dashboard = () => {
               }}
               heading={categoryMap[budget.category_id] || "Unknown Category"}
               color="hsl(355, 57%, 57%)"
+              onClick={() => handleCategoryClick(budget.category_id)}
+              style={{ cursor: 'pointer' }}
             />
           ))}
         </div>
