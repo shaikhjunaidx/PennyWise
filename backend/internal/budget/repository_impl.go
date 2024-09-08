@@ -40,7 +40,10 @@ func (r *BudgetRepositoryImpl) FindByID(id uint) (*models.Budget, error) {
 
 func (r *BudgetRepositoryImpl) FindAllByUserID(userID uint) ([]*models.Budget, error) {
 	var budgets []*models.Budget
-	if err := r.DB.Where("user_id = ?", userID).Find(&budgets).Error; err != nil {
+	month := time.Now().Format("01")
+	year := time.Now().Year()
+
+	if err := r.DB.Where("user_id = ? AND budget_month = ? AND budget_year = ?", userID, month, year).Find(&budgets).Error; err != nil {
 		return nil, err
 	}
 	return budgets, nil
