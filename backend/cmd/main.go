@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -15,7 +16,10 @@ import (
 
 func main() {
 
+	os.Setenv("ENV", "development")
+
 	database := db.InitDB()
+
 	fmt.Println("Connected to the database:", database.Name())
 
 	router := mux.NewRouter()
@@ -35,6 +39,15 @@ func main() {
 		handlers.AllowedHeaders([]string{"Content-Type", "Authorization"}),
 	)
 
-	log.Println("Server is running on port 8080...")
-	log.Fatal(http.ListenAndServe(":8080", corsMiddleware(router)))
+	go func() {
+		log.Println("Server is running on port 8080...")
+		if err := http.ListenAndServe(":8080", corsMiddleware(router)); err != nil {
+			log.Fatalf("Failed to start server: %v", err)
+		}
+	}()
+
+	// Seed the test data and make API validation calls after the server is up
+	db.SeedTestDataAndVerify()
+
+	select {}
 }
