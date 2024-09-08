@@ -46,14 +46,14 @@ const CategorySummary = () => {
     <div>
         <NavbarLoggedIn></NavbarLoggedIn>
         <div className='CategoryDetailsSummaryCont'>
-            
+        
+        <section id="Transactions" className="Transactions">
           <h1 className="sectionHeader">Transactions</h1>
-          <div className={"transactionsTableContainer"}>
+          <div className={"categoryTransactionTC"}>
             <table>
               <thead>
                 <tr>
                   <th>Transaction ID</th>
-                  <th>Category</th>
                   <th>Amount</th>
                   <th>Description</th>
                   <th>Transaction Date</th>
@@ -63,7 +63,6 @@ const CategorySummary = () => {
               {(transactions || []).map((transaction)  => (
                   <tr key={transaction.id}>
                     <td>{transaction.id}</td>
-                    <td>{transaction.category_name}</td>
                     <td>{transaction.amount.toFixed(2)}</td>
                     <td>{transaction.description || "N/A"}</td>
                     <td>{new Date(transaction.transaction_date).toLocaleString()}</td>
@@ -73,6 +72,9 @@ const CategorySummary = () => {
               </tbody>
             </table>
            </div>
+           </section>
+
+           
 
 
         </div>

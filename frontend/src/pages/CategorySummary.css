@@ -5,24 +5,20 @@
     flex-direction: column;
     align-items: center;
     justify-items: center;
-    padding: 20px;
     background-color: #f4f4f4;
-    border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     width: 100%;
-    margin: 0 auto;
-    padding: 0 20px;
 }
 
-.transactionsTableContainer {
+.categoryTransactionTC {
     width: 60%;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
   }
-  /* Transactions Table */
+
   #Transactions table {
     width: 110%; 
     margin: 0 auto;
