@@ -68,6 +68,7 @@ func SeedTestDataAndVerify() {
 	budgets := []map[string]interface{}{
 		{"category_id": 2, "amount_limit": 1000.0, "budget_month": "09", "budget_year": 2024},
 		{"category_id": 2, "amount_limit": 1000.0, "budget_month": "08", "budget_year": 2024},
+		{"category_id": 3, "amount_limit": 1500.0, "budget_month": "08", "budget_year": 2024},
 		{"category_id": 3, "amount_limit": 1500.0, "budget_month": "09", "budget_year": 2024},
 	}
 
@@ -98,6 +99,9 @@ func SeedTestDataAndVerify() {
 		{"category_id": 2, "amount": 350.0, "description": "Groceries Transaction", "transaction_date": "2024-08-25T00:00:00Z"},
 		{"category_id": 2, "amount": 150.0, "description": "Groceries Transaction", "transaction_date": "2024-08-18T00:00:00Z"},
 		{"category_id": 3, "amount": 200.0, "description": "Utilities Transaction", "transaction_date": "2024-09-08T00:00:00Z"},
+		{"category_id": 3, "amount": 350.0, "description": "Groceries Transaction", "transaction_date": "2024-08-25T00:00:00Z"},
+		{"category_id": 3, "amount": 150.0, "description": "Groceries Transaction", "transaction_date": "2024-08-18T00:00:00Z"},
+		{"category_id": 3, "amount": 200.0, "description": "Groceries Transaction", "transaction_date": "2024-09-01T00:00:00Z"},
 	}
 
 	for _, transaction := range transactions {
