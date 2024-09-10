@@ -9,7 +9,6 @@ import (
 	"github.com/shaikhjunaidx/pennywise-backend/utils"
 )
 
-// SeedTestDataAndVerify seeds test data and validates using the API.
 func SeedTestDataAndVerify() {
 	env := os.Getenv("ENV")
 	if env != "development" {
@@ -25,7 +24,6 @@ func SeedTestDataAndVerify() {
 		"password": "123",
 	}
 
-	// Create User via API
 	resp, err := utils.MakeAPICall("POST", "http://localhost:8080/api/signup", "", testUser)
 	if err != nil {
 		log.Fatalf("Error creating test user: %v", err)
@@ -36,8 +34,6 @@ func SeedTestDataAndVerify() {
 		"password": "123",
 	}
 
-	// Login User via API
-	// Create User via API
 	resp, err = utils.MakeAPICall("POST", "http://localhost:8080/api/login", "", testUserLogin)
 	if err != nil {
 		log.Fatalf("Error logging in  test user: %v", err)
@@ -51,7 +47,6 @@ func SeedTestDataAndVerify() {
 	}
 	token := signupResponse["token"]
 
-	// Create Categories via API using the token
 	categories := []map[string]string{
 		{"name": "Groceries", "description": "Test Groceries category"},
 		{"name": "Utilities", "description": "Test Utilities category"},
@@ -64,7 +59,6 @@ func SeedTestDataAndVerify() {
 		}
 	}
 
-	// Create Budgets via API using the token
 	budgets := []map[string]interface{}{
 		{"category_id": 2, "amount_limit": 1000.0, "budget_month": "09", "budget_year": 2024},
 		{"category_id": 2, "amount_limit": 1000.0, "budget_month": "08", "budget_year": 2024},
@@ -79,7 +73,6 @@ func SeedTestDataAndVerify() {
 		}
 	}
 
-	// Verify Budgets via API using the token
 	resp, err = utils.MakeAPICall("GET", "http://localhost:8080/api/budgets", token, nil)
 	if err != nil {
 		log.Fatalf("Error fetching budgets: %v", err)
@@ -90,9 +83,6 @@ func SeedTestDataAndVerify() {
 		log.Fatalf("Error decoding budgets: %v", err)
 	}
 
-	// fmt.Printf("Budgets verified: %+v\n", fetchedBudgets)
-
-	// Create Transactions via API using the token
 	transactions := []map[string]interface{}{
 		{"category_id": 2, "amount": 100.0, "description": "Groceries Transaction", "transaction_date": "2024-09-08T00:00:00Z"},
 		{"category_id": 2, "amount": 200.0, "description": "Groceries Transaction", "transaction_date": "2024-09-01T00:00:00Z"},
@@ -111,7 +101,6 @@ func SeedTestDataAndVerify() {
 		}
 	}
 
-	// Verify Transactions via API using the token
 	resp, err = utils.MakeAPICall("GET", "http://localhost:8080/api/transactions", token, nil)
 	if err != nil {
 		log.Fatalf("Error fetching transactions: %v", err)
@@ -121,8 +110,6 @@ func SeedTestDataAndVerify() {
 	if err := json.Unmarshal(resp, &fetchedTransactions); err != nil {
 		log.Fatalf("Error decoding transactions: %v", err)
 	}
-
-	// fmt.Printf("Transactions verified: %+v\n", fetchedTransactions)
 
 	log.Println("Test data and API verification completed.")
 }
